@@ -861,38 +861,46 @@
         cardDiv.appendChild(mark);
 
         cardDiv.onclick = () => {
-          const fullPhraseEl = document.getElementById("fullPhrase");
-          const explanationEl = document.getElementById("explanation");
-          const nextBtn = document.getElementById("nextButton");
+  if (hasAnswered) return;
+  hasAnswered = true;
 
-          // すでに正解を選んだ後は何もしない
-          if (hasAnswered && k !== correctKana) return;
+  const isCorrect = (k === correctKana);
 
-          if (k === correctKana) {
-            // 正解
-            hasAnswered = true;
-            mark.textContent = "〇";
-            mark.style.color = "rgba(0, 150, 0, 0.9)";
+  // ○×マークを付けるための要素を作る
+  const mark = document.createElement("div");
+  mark.style.position = "absolute";
+  mark.style.inset = "0";
+  mark.style.display = "flex";
+  mark.style.alignItems = "center";
+  mark.style.justifyContent = "center";
+  mark.style.fontSize = "80px";  // 好きな大きさに調整可
+  mark.style.fontWeight = "bold";
+  mark.style.pointerEvents = "none";
+  mark.style.textShadow = "0 0 6px rgba(0,0,0,0.8)";
 
-            // fullPhrase をここで表示
-            fullPhraseEl.textContent = q.fullPhrase;
+  // 正解・不正解で分岐
+  if (isCorrect) {
 
-            // 解説を表示
-            showExplanation(q);
+    // ★ ここで黒丸を消す（あなたの要望）
+    mask.style.display = "none";
 
-            // 「次の問題」ボタンを表示
-            nextBtn.style.display = "block";
-            nextBtn.disabled = false;
-          } else {
-            // 不正解：✖表示（問題はそのまま続行）
-            mark.textContent = "✖";
-            mark.style.color = "rgba(200, 0, 0, 0.9)";
-          }
-        };
+    mark.textContent = "◯";
+    mark.style.color = "rgba(0,255,0,0.9)";
 
-        cardsEl.appendChild(cardDiv);
-      });
-    }
+    cardDiv.appendChild(mark);
+
+    showFullPhraseAndExplanation(q);
+
+  } else {
+
+    mark.textContent = "✕";
+    mark.style.color = "rgba(255,0,0,0.9)";
+
+    cardDiv.appendChild(mark);
+
+    showFullPhraseAndExplanation(q);
+  }
+};
 
     function showExplanation(q) {
       const explanationEl = document.getElementById("explanation");
