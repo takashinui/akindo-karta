@@ -135,21 +135,14 @@
     // 初期表示から何ミリ秒後に fullPhrase（読み札全文）を出すか
     const FULL_PHRASE_DELAY = 3000;      // 3秒後
 
-    // 正解したあと、解説を表示したままにする時間
+    // 正解したあと、解説を表示したままにする時間（ミリ秒）
     const EXPLANATION_DURATION = 4000;   // 4秒キープしてから次の問題へ
 
     // ==============================
-    //  質問データ（あなたの現行コードをここに）
+    //  質問データ
     // ==============================
 
-    // ★ここに、いま使っている const questions = [...] 全体をそのまま貼る★
-    // 例：
-    // const questions = [
-    //   { id: "q1", kana: "あ", leadingKana: "あ", fullPhrase: "あ：...", explanation: `...` },
-    //   ...
-    // ];
-
-    // ====== 問題データ======
+  // ====== 問題データ======
    const questions = [
   {
     id: "q1",
@@ -782,15 +775,7 @@
 ];
 
 
-
-
-    // ==============================
-    //  内部状態
-    // ==============================
-    let currentIndex = 0;
-    let order = [];
-    let hasAnswered = false;
-
+    
     // かな → ファイル名
     function kanaToFile(k) {
       const map = {
@@ -808,13 +793,15 @@
       return map[k];
     }
 
-    // ランダム順を作り直し
+    let currentIndex = 0;
+    let order = [];
+    let hasAnswered = false;
+
     function shuffleOrder() {
       order = [...Array(questions.length).keys()];
       order.sort(() => Math.random() - 0.5);
     }
 
-    // 次の問題のインデックスに進める
     function nextQuestionIndex() {
       currentIndex++;
       if (currentIndex >= questions.length) {
@@ -822,10 +809,6 @@
         shuffleOrder();
       }
     }
-
-    // ==============================
-    //  メイン描画
-    // ==============================
 
     function showQuestion() {
       hasAnswered = false;
@@ -895,14 +878,12 @@
           const isCorrect = (k === correctKana);
 
           if (isCorrect) {
-            // 正解：解説を表示してから一定時間後に次の問題
             showExplanation(q);
             setTimeout(() => {
               nextQuestionIndex();
               showQuestion();
             }, EXPLANATION_DURATION);
           } else {
-            // 不正解：すぐ次の問題へ（解説は出さない仕様）
             nextQuestionIndex();
             showQuestion();
           }
@@ -918,16 +899,13 @@
       explanationEl.style.display = "block";
     }
 
-    // ==============================
-    //  起動
-    // ==============================
     function startGame() {
       shuffleOrder();
       currentIndex = 0;
+      console.log("questions:", questions.length, "問"); // 定義チェック用
       showQuestion();
     }
 
-    // ページ読み込み完了後に開始
     window.addEventListener("load", startGame);
   </script>
 </body>
