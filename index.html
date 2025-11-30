@@ -900,17 +900,25 @@
       explanationEl.style.display = "block";
     }
 
-    function startGame() {
+        function startGame() {
       shuffleOrder();
       currentIndex = 0;
       console.log("questions:", questions.length, "問");
 
       const nextBtn = document.getElementById("nextButton");
-      nextBtn.addEventListener("click", () => {
+
+      function handleNext() {
         nextQuestionIndex();
         showQuestion();
         window.scrollTo({ top: 0, behavior: "smooth" });
-      });
+      }
+
+      // iPhone を含めたタッチ端末では pointerup を優先
+      if (window.PointerEvent) {
+        nextBtn.addEventListener("pointerup", handleNext);
+      } else {
+        nextBtn.addEventListener("click", handleNext);
+      }
 
       showQuestion();
     }
