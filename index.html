@@ -1,237 +1,153 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>あきんどカルタ</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>あきんどカルタ</title>
 
-<style>
-  body {
-    margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-    background: #f5f5f5;
-  }
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+      background: #f5f5f5;
+    }
 
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 12px;
-  }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 12px;
+      box-sizing: border-box;
+    }
 
-  .title {
-    text-align: center;
-    font-size: 26px;
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
+    .title {
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
 
-  /* fullPhrase 用に固定高さを確保 */
-  #fullPhrase {
-    min-height: 3.5em;   /* 高さ確保（調整可能） */
-    font-size: 18px;
-    font-weight: 600;
-    text-align: center;
-    padding: 4px;
-    margin-bottom: 8px;
-  }
+    /* 現在の問題の文字（かな1文字） */
+    #currentKana {
+      text-align: center;
+      font-size: 42px;
+      font-weight: bold;
+      margin: 8px 0;
+    }
 
-  #currentKana {
-    text-align: center;
-    font-size: 42px;
-    font-weight: bold;
-    margin: 8px 0;
-  }
+    /* fullPhrase の表示領域をあらかじめ確保しておく */
+    #fullPhrase {
+      min-height: 3.5em;  /* ここで高さを確保：表示されてもカードが下にずれない */
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      padding: 4px;
+      margin-bottom: 8px;
+    }
 
-  /* カードグリッド */
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-top: 12px;
-  }
+    /* カード（絵札）のグリッド：iPhone 縦基準で 2×2 */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
 
-  .card {
-    position: relative;
-    background: #fff;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    cursor: pointer;
-  }
+    .card {
+      position: relative;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
 
-  .card img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
 
-  /* 黒丸を塗りつぶして元のひらがなを消す */
-  .kana-mask {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 32px;
-    height: 32px;
-    background: black;     /* 黒丸で塗りつぶす */
-    border-radius: 50%;
-    opacity: 1;
-  }
+    /* 絵札右肩の黒丸を完全に黒塗りして、元の白抜きひらがなを潰す */
+    .kana-mask {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 32px;
+      height: 32px;
+      background: black;   /* 黒丸で塗りつぶし */
+      border-radius: 50%;
+      opacity: 1;
+      pointer-events: none;
+    }
 
-  /* 解説エリア（画面固定サイズ） */
-  #explanation {
-    display: none;
-    background: #fff;
-    padding: 10px;
-    margin-top: 12px;
-    border-radius: 10px;
-    max-height: 200px;
-    overflow-y: auto;
-    font-size: 14px;
-    line-height: 1.5;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  }
-</style>
+    /* 解説表示欄：高さを制限し、中だけスクロール */
+    #explanation {
+      display: none;
+      background: #fff;
+      padding: 10px;
+      margin-top: 12px;
+      border-radius: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.5;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    /* iPad mini など横幅が広いとき少し余裕を持たせる */
+    @media (min-width: 768px) {
+      #currentKana {
+        font-size: 48px;
+      }
+      #fullPhrase {
+        font-size: 20px;
+      }
+      .cards {
+        gap: 12px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<div class="container">
-  <div class="title">あきんどカルタ</div>
+  <div class="container">
+    <div class="title">あきんどカルタ</div>
 
-  <div id="currentKana"></div>
+    <!-- 問題の文字（かな1文字） -->
+    <div id="currentKana"></div>
 
-  <!-- fullPhrase のための固定領域 -->
-  <div id="fullPhrase"></div>
+    <!-- fullPhrase 用の固定領域（高さだけ先に確保） -->
+    <div id="fullPhrase"></div>
 
-  <div class="cards" id="cards"></div>
+    <!-- 絵札4枚 -->
+    <div class="cards" id="cards"></div>
 
-  <div id="explanation"></div>
-</div>
+    <!-- 解説 -->
+    <div id="explanation"></div>
+  </div>
 
-<script>
-/* ------- 時間設定（ms） ------- */
-const FULL_PHRASE_DELAY = 3000;   // 3秒後に fullPhrase を表示
+  <script>
+    // ==============================
+    //  時間・振る舞いの設定
+    // ==============================
 
-/* ------- 既存の questions 配列はそのまま再利用 ------- */
-// const questions = [ ... 全46札 ... ];
+    // 初期表示から何ミリ秒後に fullPhrase（読み札全文）を出すか
+    const FULL_PHRASE_DELAY = 3000;      // 3秒後
 
-let currentIndex = 0;
+    // 正解したあと、解説を表示したままにする時間
+    const EXPLANATION_DURATION = 4000;   // 4秒キープしてから次の問題へ
 
-/* ランダム並び */
-const order = [...Array(questions.length).keys()]
-  .sort(() => Math.random() - 0.5);
+    // ==============================
+    //  質問データ（あなたの現行コードをここに）
+    // ==============================
 
-/* --------------------------------------
-   出題処理
--------------------------------------- */
-function showQuestion() {
-  const q = questions[ order[currentIndex] ];
-
-  // 説明は非表示に戻す
-  const exp = document.getElementById("explanation");
-  exp.style.display = "none";
-  exp.textContent = "";
-
-  // 文字表示
-  const kanaEl = document.getElementById("currentKana");
-  kanaEl.textContent = q.leadingKana;
-
-  // fullPhrase をまだ表示しない（空のまま）
-  const fp = document.getElementById("fullPhrase");
-  fp.textContent = "";
-
-  // 絵札4枚を生成（正解＋誤答ランダム3）
-  createCards(q);
-
-  // 3秒後に fullPhrase 表示
-  setTimeout(() => {
-    fp.textContent = q.fullPhrase;
-  }, FULL_PHRASE_DELAY);
-}
-
-/* --------------------------------------
-   絵札生成処理
--------------------------------------- */
-function createCards(q) {
-  const cardArea = document.getElementById("cards");
-  cardArea.innerHTML = "";
-
-  const correctKana = q.kana;
-
-  // すべてのかなから正解以外を抽出
-  const allKana = questions.map(x => x.kana);
-  const wrongList = allKana.filter(k => k !== correctKana);
-
-  // ランダムに3つ選ぶ
-  const wrong3 = wrongList
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3);
-
-  // 正解＋誤答を混ぜる
-  const choices = [correctKana, ...wrong3]
-      .sort(() => Math.random() - 0.5);
-
-  choices.forEach(k => {
-    const div = document.createElement("div");
-    div.className = "card";
-
-    const img = document.createElement("img");
-    img.src = `images/${kanaToFile(k)}`;
-
-    const mask = document.createElement("div");
-    mask.className = "kana-mask";
-
-    div.appendChild(img);
-    div.appendChild(mask);
-
-    div.onclick = () => {
-      if (k === correctKana) showExplanation(q);
-      nextQuestion();
-    };
-
-    cardArea.appendChild(div);
-  });
-}
-
-/* ---------- かな → ファイル名 ---------- */
-function kanaToFile(k) {
-  const map = {
-    "あ":"a.jpg","い":"i.jpg","う":"u.jpg","え":"e.jpg","お":"o.jpg",
-    "か":"ka.jpg","き":"ki.jpg","く":"ku.jpg","け":"ke.jpg","こ":"ko.jpg",
-    "さ":"sa.jpg","し":"si.jpg","す":"su.jpg","せ":"se.jpg","そ":"so.jpg",
-    "た":"ta.jpg","ち":"ti.jpg","つ":"tu.jpg","て":"te.jpg","と":"to.jpg",
-    "な":"na.jpg","に":"ni.jpg","ぬ":"nu.jpg","ね":"ne.jpg","の":"no.jpg",
-    "は":"ha.jpg","ひ":"hi.jpg","ふ":"hu.jpg","へ":"he.jpg","ほ":"ho.jpg",
-    "ま":"ma.jpg","み":"mi.jpg","む":"mu.jpg","め":"me.jpg","も":"mo.jpg",
-    "や":"ya.jpg","ゆ":"yu.jpg","よ":"yo.jpg",
-    "ら":"ra.jpg","り":"ri.jpg","る":"ru.jpg","れ":"re.jpg","ろ":"ro.jpg",
-    "わ":"wa.jpg","を":"wo.jpg","ん":"n.jpg"
-  };
-  return map[k];
-}
-
-/* --------------------------------------
-   解説表示
--------------------------------------- */
-function showExplanation(q) {
-  const exp = document.getElementById("explanation");
-  exp.textContent = q.explanation;
-  exp.style.display = "block";
-}
-
-function nextQuestion() {
-  currentIndex++;
-  if (currentIndex >= questions.length) {
-    currentIndex = 0;
-    order.sort(() => Math.random() - 0.5);
-  }
-  showQuestion();
-}
-
-/* スタート */
-showQuestion();
-</script>
-</body>
-</html>
+    // ★ここに、いま使っている const questions = [...] 全体をそのまま貼る★
+    // 例：
+    // const questions = [
+    //   { id: "q1", kana: "あ", leadingKana: "あ", fullPhrase: "あ：...", explanation: `...` },
+    //   ...
+    // ];
 
     // ====== 問題データ======
    const questions = [
@@ -866,278 +782,153 @@ showQuestion();
 ];
 
 
-    // ====== 状態管理 ======
-    let currentIndex = 0;         // 出題順インデックス
-    let questionOrder = [];       // 出題順（questions のインデックスシャッフル）
-    let score = 0;
-    let canAnswer = false;
+
+
+    // ==============================
+    //  内部状態
+    // ==============================
+    let currentIndex = 0;
+    let order = [];
     let hasAnswered = false;
-    let timerId = null;
-    let questionStartTime = null;
 
-    // ====== DOM ======
-    const leadingKanaEl   = document.getElementById("leadingKana");
-    const fullPhraseEl    = document.getElementById("fullPhrase");
-    const cardsGridEl     = document.getElementById("cardsGrid");
-    const timerTextEl     = document.getElementById("timerText");
-    const scoreTextEl     = document.getElementById("scoreText");
-    const messageEl       = document.getElementById("message");
-    const explanationEl   = document.getElementById("explanation");
-    const nextButtonEl    = document.getElementById("nextButton");
-    const questionCountEl = document.getElementById("questionCount");
-    const progressEl      = document.getElementById("progress");
-    const finalResultEl   = document.getElementById("finalResult");
-
-    // ====== ユーティリティ ======
-    function shuffleArray(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
-
-    function resetTimer() {
-      if (timerId !== null) {
-        clearInterval(timerId);
-        timerId = null;
-      }
-      timerTextEl.textContent = "--.-";
-    }
-
-    function updateTimer() {
-      if (!questionStartTime) return;
-      const elapsed   = Date.now() - questionStartTime;
-      const remaining = Math.max(0, MAX_TIME_MS - elapsed);
-      const sec       = remaining / 1000;
-      timerTextEl.textContent = sec.toFixed(1);
-
-      if (remaining <= 0 && !hasAnswered) {
-        handleTimeout();
-      }
-    }
-
-    function startTimer() {
-      resetTimer();
-      questionStartTime = Date.now();
-      timerId = setInterval(updateTimer, 100);
-    }
-
-    function stopTimer() {
-      if (timerId !== null) {
-        clearInterval(timerId);
-        timerId = null;
-      }
-    }
-
-    function setMessage(text, type) {
-      messageEl.textContent = text;
-      messageEl.classList.remove("ok", "ng");
-      if (type === "ok") messageEl.classList.add("ok");
-      if (type === "ng") messageEl.classList.add("ng");
-    }
-
-    function getCurrentQuestion() {
-      const qIndex = questionOrder[currentIndex];
-      return questions[qIndex];
-    }
-
-    // ====== カード（正解＋不正解3枚）を作る ======
-    function buildCardsForQuestion(q) {
-      const kana = q.kana;
-
-      const correctKey = kanaToFileKey[kana];
-      const correctCard = {
-        src: `images/${correctKey}.jpg`,
-        alt: `${kana} の札`,
-        isCorrect: true
+    // かな → ファイル名
+    function kanaToFile(k) {
+      const map = {
+        "あ":"a.jpg","い":"i.jpg","う":"u.jpg","え":"e.jpg","お":"o.jpg",
+        "か":"ka.jpg","き":"ki.jpg","く":"ku.jpg","け":"ke.jpg","こ":"ko.jpg",
+        "さ":"sa.jpg","し":"si.jpg","す":"su.jpg","せ":"se.jpg","そ":"so.jpg",
+        "た":"ta.jpg","ち":"ti.jpg","つ":"tu.jpg","て":"te.jpg","と":"to.jpg",
+        "な":"na.jpg","に":"ni.jpg","ぬ":"nu.jpg","ね":"ne.jpg","の":"no.jpg",
+        "は":"ha.jpg","ひ":"hi.jpg","ふ":"hu.jpg","へ":"he.jpg","ほ":"ho.jpg",
+        "ま":"ma.jpg","み":"mi.jpg","む":"mu.jpg","め":"me.jpg","も":"mo.jpg",
+        "や":"ya.jpg","ゆ":"yu.jpg","よ":"yo.jpg",
+        "ら":"ra.jpg","り":"ri.jpg","る":"ru.jpg","れ":"re.jpg","ろ":"ro.jpg",
+        "わ":"wa.jpg","を":"wo.jpg","ん":"n.jpg"
       };
-
-      const wrongKanaPool = kanaList.filter(k => k !== kana);
-      const wrongKanaSelected = shuffleArray(wrongKanaPool).slice(0, 3);
-
-      const wrongCards = wrongKanaSelected.map(k => {
-        const key = kanaToFileKey[k];
-        return {
-          src: `images/${key}.jpg`,
-          alt: `${k} の札`,
-          isCorrect: false
-        };
-      });
-
-      return shuffleArray([correctCard, ...wrongCards]);
+      return map[k];
     }
 
-    // ====== 問題表示 ======
-    function showQuestion() {
-      const q = getCurrentQuestion();
-      if (!q) return;
+    // ランダム順を作り直し
+    function shuffleOrder() {
+      order = [...Array(questions.length).keys()];
+      order.sort(() => Math.random() - 0.5);
+    }
 
-      canAnswer = false;
+    // 次の問題のインデックスに進める
+    function nextQuestionIndex() {
+      currentIndex++;
+      if (currentIndex >= questions.length) {
+        currentIndex = 0;
+        shuffleOrder();
+      }
+    }
+
+    // ==============================
+    //  メイン描画
+    // ==============================
+
+    function showQuestion() {
       hasAnswered = false;
-      resetTimer();
-      setMessage("", null);
+
+      const q = questions[order[currentIndex]];
+
+      const kanaEl = document.getElementById("currentKana");
+      const fullPhraseEl = document.getElementById("fullPhrase");
+      const explanationEl = document.getElementById("explanation");
+
+      // 文字（かな1文字）を表示
+      kanaEl.textContent = q.leadingKana;
+
+      // fullPhrase はまだ表示しない（でも高さはCSSで確保済み）
+      fullPhraseEl.textContent = "";
+
+      // 前の解説を消す
       explanationEl.style.display = "none";
       explanationEl.textContent = "";
-      nextButtonEl.style.display = "none";
-      finalResultEl.textContent = "";
 
-      const questionNumber = currentIndex + 1;
-      questionCountEl.textContent = `第${questionNumber}問`;
-      progressEl.textContent = `${questionNumber} / ${questions.length}`;
+      // 絵札4枚を作る（問題文字と同時に表示）
+      createCards(q);
 
-      leadingKanaEl.textContent = q.leadingKana;
-      fullPhraseEl.textContent = "";
-      cardsGridEl.innerHTML = "";
-
+      // 3秒後に fullPhrase を表示
       setTimeout(() => {
-        const cards = buildCardsForQuestion(q);
-        renderCards(cards);
-        canAnswer = true;
-        startTimer();
-      }, 1000);
-
-      setTimeout(() => {
+        // すでに次の問題に進んでいたら表示しない
+        if (questions[order[currentIndex]] !== q) return;
         fullPhraseEl.textContent = q.fullPhrase;
-      }, 2000);
+      }, FULL_PHRASE_DELAY);
     }
 
-    function renderCards(cards) {
-      cardsGridEl.innerHTML = "";
+    function createCards(q) {
+      const cardsEl = document.getElementById("cards");
+      cardsEl.innerHTML = "";
 
-      cards.forEach(card => {
-        const cardEl = document.createElement("div");
-        cardEl.className = "card";
-        cardEl.dataset.correct = card.isCorrect ? "1" : "0";
+      const correctKana = q.kana;
 
-        const coverEl = document.createElement("div");
-        coverEl.className = "kana-cover";
+      // 正解以外のかなを集めてランダムに3つ選択
+      const allKana = questions.map(x => x.kana);
+      const wrongCandidates = allKana.filter(k => k !== correctKana);
+      const wrong3 = wrongCandidates
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
 
-        const imgEl = document.createElement("img");
-        imgEl.src = card.src;
-        imgEl.alt = card.alt;
+      // 正解＋誤答3を混ぜて4枚
+      const choiceKanaList = [correctKana, ...wrong3]
+        .sort(() => Math.random() - 0.5);
 
-        cardEl.appendChild(imgEl);
-        cardEl.appendChild(coverEl);
+      choiceKanaList.forEach(k => {
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "card";
 
-        cardEl.addEventListener("click", () => {
-          handleAnswer(cardEl, card.isCorrect);
-        });
+        const img = document.createElement("img");
+        img.src = "images/" + kanaToFile(k);
+        img.alt = k;
 
-        cardsGridEl.appendChild(cardEl);
+        const mask = document.createElement("div");
+        mask.className = "kana-mask";
+
+        cardDiv.appendChild(img);
+        cardDiv.appendChild(mask);
+
+        cardDiv.onclick = () => {
+          if (hasAnswered) return;
+          hasAnswered = true;
+
+          const isCorrect = (k === correctKana);
+
+          if (isCorrect) {
+            // 正解：解説を表示してから一定時間後に次の問題
+            showExplanation(q);
+            setTimeout(() => {
+              nextQuestionIndex();
+              showQuestion();
+            }, EXPLANATION_DURATION);
+          } else {
+            // 不正解：すぐ次の問題へ（解説は出さない仕様）
+            nextQuestionIndex();
+            showQuestion();
+          }
+        };
+
+        cardsEl.appendChild(cardDiv);
       });
     }
 
-    // ====== 回答処理 ======
-    function handleAnswer(cardEl, isCorrect) {
-      if (!canAnswer || hasAnswered) return;
-
-      hasAnswered = true;
-      canAnswer = false;
-      stopTimer();
-
-      const elapsed   = Date.now() - questionStartTime;
-      const remaining = Math.max(0, MAX_TIME_MS - elapsed);
-      let deltaScore  = 0;
-
-      const allCards = cardsGridEl.querySelectorAll(".card");
-      allCards.forEach(c => c.classList.add("disabled"));
-
-      allCards.forEach(c => {
-        if (c.dataset.correct === "1") {
-          c.classList.add("correct");
-        }
-      });
-
-      if (isCorrect) {
-        const sec = remaining / 1000;
-        deltaScore = Math.round(sec) * POINTS_PER_SECOND;
-        score += deltaScore;
-
-        cardEl.classList.add("correct");
-        setMessage(`正解！ +${deltaScore} 点`, "ok");
-      } else {
-        deltaScore = WRONG_PENALTY;
-        score += deltaScore;
-        cardEl.classList.add("wrong");
-        setMessage(`残念… ${WRONG_PENALTY} 点`, "ng");
-      }
-
-      scoreTextEl.textContent = score.toString();
-
-      const q = getCurrentQuestion();
+    function showExplanation(q) {
+      const explanationEl = document.getElementById("explanation");
       explanationEl.textContent = q.explanation;
       explanationEl.style.display = "block";
-
-      if (currentIndex < questionOrder.length - 1) {
-        nextButtonEl.textContent = "次の問題へ";
-      } else {
-        nextButtonEl.textContent = "結果を見る";
-      }
-      nextButtonEl.style.display = "inline-block";
     }
 
-    function handleTimeout() {
-      if (hasAnswered) return;
-      hasAnswered = true;
-      canAnswer = false;
-      stopTimer();
-
-      const allCards = cardsGridEl.querySelectorAll(".card");
-      allCards.forEach(c => c.classList.add("disabled"));
-
-      allCards.forEach(c => {
-        if (c.dataset.correct === "1") {
-          c.classList.add("correct");
-        }
-      });
-
-      score += WRONG_PENALTY;
-      scoreTextEl.textContent = score.toString();
-      setMessage(`時間切れ！ ${WRONG_PENALTY} 点`, "ng");
-
-      const q = getCurrentQuestion();
-      explanationEl.textContent = q.explanation;
-      explanationEl.style.display = "block";
-
-      if (currentIndex < questionOrder.length - 1) {
-        nextButtonEl.textContent = "次の問題へ";
-      } else {
-        nextButtonEl.textContent = "結果を見る";
-      }
-      nextButtonEl.style.display = "inline-block";
-    }
-
-    function goToNext() {
-      if (currentIndex < questionOrder.length - 1) {
-        currentIndex += 1;
-        showQuestion();
-      } else {
-        finalResultEl.textContent =
-          `全${questions.length}問終了！ あなたのあきんどスコアは ${score} 点です。`;
-        nextButtonEl.style.display = "none";
-      }
-    }
-
-    nextButtonEl.addEventListener("click", goToNext);
-
-    // ====== ゲーム開始 ======
+    // ==============================
+    //  起動
+    // ==============================
     function startGame() {
-      score = 0;
-      scoreTextEl.textContent = "0";
-
-      const indices = [];
-      for (let i = 0; i < questions.length; i++) {
-        indices.push(i);
-      }
-      questionOrder = shuffleArray(indices);
+      shuffleOrder();
       currentIndex = 0;
-
       showQuestion();
     }
 
-    startGame();
+    // ページ読み込み完了後に開始
+    window.addEventListener("load", startGame);
   </script>
 </body>
 </html>
