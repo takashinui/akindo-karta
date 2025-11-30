@@ -1,538 +1,382 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>あきんどカルタゲーム</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<script>
+  // ====== 設定値（ここを変えればルール調整できます） ======
+  const MAX_TIME_MS = 10000;         // 絵札表示からの制限時間（ミリ秒）
+  const POINTS_PER_SECOND = 10;      // 1秒あたりの加点
+  const WRONG_PENALTY = -20;         // 不正解 & 時間切れペナルティ
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f5;
-      color: #222;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 12px;
-    }
+  // ====== 使うかなの一覧 ======
+  // 「こ」はロジック上は「こ」として扱うが、画像は ko.jpg を使う
+  const kanaList = [
+    "あ","い","う","え","お",
+    "か","き","く","け","こ",
+    "さ","し","す","せ","そ",
+    "た","ち","つ","て","と",
+    "な","に","ぬ","ね","の",
+    "は","ひ","ふ","へ","ほ",
+    "ま","み","む","め","も",
+    "や","ゆ","よ",
+    "ら","り","る","れ","ろ",
+    "わ","を","ん"
+  ];
 
-    .game-container {
-      width: 100%;
-      max-width: 480px;
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      padding: 16px 16px 20px;
-    }
+  // かな → ファイル名のキー（.jpg は後で付ける）
+  const kanaToFileKey = {
+    "あ": "a",
+    "い": "i",
+    "う": "u",
+    "え": "e",
+    "お": "o",
 
-    header {
-      text-align: center;
-      margin-bottom: 12px;
-    }
+    "か": "ka",
+    "き": "ki",
+    "く": "ku",
+    "け": "ke",
+    "こ": "ko",   // 札は「ご」だがファイル名は ko.jpg
 
-    header h1 {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
+    "さ": "sa",
+    "し": "si",
+    "す": "su",
+    "せ": "se",
+    "そ": "so",
 
-    header p {
-      font-size: 12px;
-      color: #666;
-    }
+    "た": "ta",
+    "ち": "ti",
+    "つ": "tu",
+    "て": "te",
+    "と": "to",
 
-    .status-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      margin-bottom: 8px;
-      color: #555;
-    }
+    "な": "na",
+    "に": "ni",
+    "ぬ": "nu",
+    "ね": "ne",
+    "の": "no",
 
-    .status-bar span {
-      min-width: 80px;
-    }
+    "は": "ha",
+    "ひ": "hi",
+    "ふ": "hu",
+    "へ": "he",
+    "ほ": "ho",
 
-    .leading-kana {
-      text-align: center;
-      margin: 8px 0;
-      font-size: 40px;
-      font-weight: bold;
-    }
+    "ま": "ma",
+    "み": "mi",
+    "む": "mu",
+    "め": "me",
+    "も": "mo",
 
-    .full-phrase {
-      text-align: center;
-      margin: 4px 0 10px;
-      min-height: 24px;
-      font-size: 14px;
-      color: #333;
-    }
+    "や": "ya",
+    "ゆ": "yu",
+    "よ": "yo",
 
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 8px;
-    }
+    "ら": "ra",
+    "り": "ri",
+    "る": "ru",
+    "れ": "re",
+    "ろ": "ro",
 
-    .card {
-      position: relative;
-      background: #fafafa;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
-      min-height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    "わ": "wa",
+    "を": "wo",
+    "ん": "n"
+  };
 
-    .card img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: cover;
+  // ====== 問題データ ======
+  // 今はサンプル1問だけ。ここに今後 PDF に合わせて全問を追加していく。
+  const questions = [
+    {
+      id: "a",
+      kana: "あ",                             // 先頭の文字
+      leadingKana: "あ",                      // 最初にドンと出す1文字
+      fullPhrase: "あ：あかんもんはあかん",  // 読み札
+      explanation: "【サンプル】ここに「あ：あかんもんはあかん」の解説文を入れてください。"
     }
+    // ここに「い」「う」…分を追加予定
+  ];
 
-    .card.disabled {
-      cursor: default;
-      opacity: 0.7;
+  // ====== 状態管理用変数 ======
+  let currentIndex = 0;         // 出題順配列のインデックス
+  let questionOrder = [];       // 出題順（questions のインデックスをシャッフルしたもの）
+  let score = 0;
+  let canAnswer = false;
+  let hasAnswered = false;
+  let timerId = null;
+  let questionStartTime = null;
+
+  // ====== DOM 取得 ======
+  const leadingKanaEl   = document.getElementById("leadingKana");
+  const fullPhraseEl    = document.getElementById("fullPhrase");
+  const cardsGridEl     = document.getElementById("cardsGrid");
+  const timerTextEl     = document.getElementById("timerText");
+  const scoreTextEl     = document.getElementById("scoreText");
+  const messageEl       = document.getElementById("message");
+  const explanationEl   = document.getElementById("explanation");
+  const nextButtonEl    = document.getElementById("nextButton");
+  const questionCountEl = document.getElementById("questionCount");
+  const progressEl      = document.getElementById("progress");
+  const finalResultEl   = document.getElementById("finalResult");
+
+  // ====== ユーティリティ ======
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
     }
+    return a;
+  }
 
-    .card:hover:not(.disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  function resetTimer() {
+    if (timerId !== null) {
+      clearInterval(timerId);
+      timerId = null;
     }
+    timerTextEl.textContent = "--.-";
+  }
 
-    .card.correct {
-      border-color: #2e7d32;
+  function updateTimer() {
+    if (!questionStartTime) return;
+    const elapsed   = Date.now() - questionStartTime;
+    const remaining = Math.max(0, MAX_TIME_MS - elapsed);
+    const sec       = remaining / 1000;
+    timerTextEl.textContent = sec.toFixed(1);
+
+    if (remaining <= 0 && !hasAnswered) {
+      handleTimeout();
     }
+  }
 
-    .card.wrong {
-      border-color: #c62828;
+  function startTimer() {
+    resetTimer();
+    questionStartTime = Date.now();
+    timerId = setInterval(updateTimer, 100);
+  }
+
+  function stopTimer() {
+    if (timerId !== null) {
+      clearInterval(timerId);
+      timerId = null;
     }
+  }
 
-    .kana-cover {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 56px;
-      height: 56px;
-      background: #ffffff;
-      /* 必要ならここを少し大きくして、ひらがなが完全に隠れるように調整 */
-      box-shadow: 0 0 4px rgba(255,255,255,0.8);
-    }
+  function setMessage(text, type) {
+    messageEl.textContent = text;
+    messageEl.classList.remove("ok", "ng");
+    if (type === "ok") messageEl.classList.add("ok");
+    if (type === "ng") messageEl.classList.add("ng");
+  }
 
-    .info-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      margin: 6px 0;
-      color: #555;
-    }
+  function getCurrentQuestion() {
+    const qIndex = questionOrder[currentIndex];
+    return questions[qIndex];
+  }
 
-    .timer {
-      font-variant-numeric: tabular-nums;
-    }
+  // ====== カード（正解＋不正解3枚）を作る ======
+  function buildCardsForQuestion(q) {
+    const kana = q.kana;  // 例：「あ」「こ」など
 
-    .score {
-      font-variant-numeric: tabular-nums;
-      font-weight: 600;
-    }
+    // 正解カード
+    const correctKey = kanaToFileKey[kana];
+    const correctCard = {
+      src: `images/${correctKey}.jpg`,
+      alt: `${kana} の札`,
+      isCorrect: true
+    };
 
-    .message {
-      min-height: 20px;
-      font-size: 13px;
-      margin: 4px 0;
-    }
+    // 不正解用のかな候補（自分以外）
+    const wrongKanaPool = kanaList.filter(k => k !== kana);
+    const wrongKanaSelected = shuffleArray(wrongKanaPool).slice(0, 3);
 
-    .message.ok {
-      color: #2e7d32;
-    }
+    const wrongCards = wrongKanaSelected.map(k => {
+      const key = kanaToFileKey[k];
+      return {
+        src: `images/${key}.jpg`,
+        alt: `${k} の札`,
+        isCorrect: false
+      };
+    });
 
-    .message.ng {
-      color: #c62828;
-    }
+    // 正解＋不正解をまとめてシャッフル
+    const allCards = shuffleArray([correctCard, ...wrongCards]);
+    return allCards;
+  }
 
-    .explanation {
-      margin-top: 6px;
-      font-size: 12px;
-      line-height: 1.5;
-      background: #f8f8f8;
-      border-radius: 8px;
-      padding: 8px;
-      max-height: 140px;
-      overflow-y: auto;
-    }
+  // ====== 問題表示ロジック ======
+  function showQuestion() {
+    const q = getCurrentQuestion();
+    if (!q) return;
 
-    .buttons {
-      margin-top: 10px;
-      display: flex;
-      justify-content: center;
-    }
+    // 状態リセット
+    canAnswer = false;
+    hasAnswered = false;
+    resetTimer();
+    setMessage("", null);
+    explanationEl.style.display = "none";
+    explanationEl.textContent = "";
+    nextButtonEl.style.display = "none";
+    finalResultEl.textContent = "";
 
-    .btn {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 20px;
-      font-size: 14px;
-      cursor: pointer;
-      background: #1976d2;
-      color: #fff;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      transition: opacity 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
-    }
+    // 進捗表示
+    const questionNumber = currentIndex + 1;
+    questionCountEl.textContent = `第${questionNumber}問`;
+    progressEl.textContent = `${questionNumber} / ${questions.length}`;
 
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: default;
-      box-shadow: none;
-      transform: none;
-    }
+    // 0秒：先頭1文字だけ表示
+    leadingKanaEl.textContent = q.leadingKana;
+    fullPhraseEl.textContent = "";
 
-    .btn:not(:disabled):active {
-      transform: translateY(1px);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
-    }
+    // カードはいったん消す
+    cardsGridEl.innerHTML = "";
 
-    .final-result {
-      margin-top: 8px;
-      font-size: 13px;
-      text-align: center;
-      color: #333;
-    }
+    // 1秒後：カード4枚を表示して回答可能に＆タイマー開始
+    setTimeout(() => {
+      const cards = buildCardsForQuestion(q);
+      renderCards(cards);
+      canAnswer = true;
+      startTimer();
+    }, 1000);
 
-    @media (max-width: 360px) {
-      .game-container {
-        padding: 12px;
+    // 2秒後：フルのセリフを表示
+    setTimeout(() => {
+      fullPhraseEl.textContent = q.fullPhrase;
+    }, 2000);
+  }
+
+  function renderCards(cards) {
+    cardsGridEl.innerHTML = "";
+
+    cards.forEach(card => {
+      const cardEl = document.createElement("div");
+      cardEl.className = "card";
+      cardEl.dataset.correct = card.isCorrect ? "1" : "0";
+
+      const coverEl = document.createElement("div");
+      coverEl.className = "kana-cover";
+
+      const imgEl = document.createElement("img");
+      imgEl.src = card.src;
+      imgEl.alt = card.alt;
+
+      cardEl.appendChild(imgEl);
+      cardEl.appendChild(coverEl);
+
+      cardEl.addEventListener("click", () => {
+        handleAnswer(cardEl, card.isCorrect);
+      });
+
+      cardsGridEl.appendChild(cardEl);
+    });
+  }
+
+  // ====== 回答処理 ======
+  function handleAnswer(cardEl, isCorrect) {
+    if (!canAnswer || hasAnswered) return;
+
+    hasAnswered = true;
+    canAnswer = false;
+    stopTimer();
+
+    const elapsed   = Date.now() - questionStartTime;
+    const remaining = Math.max(0, MAX_TIME_MS - elapsed);
+    let deltaScore  = 0;
+
+    const allCards = cardsGridEl.querySelectorAll(".card");
+    allCards.forEach(c => c.classList.add("disabled"));
+
+    // 正解カードをハイライト
+    allCards.forEach(c => {
+      if (c.dataset.correct === "1") {
+        c.classList.add("correct");
       }
-      .leading-kana {
-        font-size: 32px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="game-container">
-    <header>
-      <h1>あきんどカルタ</h1>
-      <p>「あきんどの精神」を学ぶカルタゲーム</p>
-    </header>
+    });
 
-    <div class="status-bar">
-      <span id="questionCount">第1問</span>
-      <span id="progress"></span>
-    </div>
-
-    <div class="leading-kana" id="leadingKana">あ</div>
-    <div class="full-phrase" id="fullPhrase"></div>
-
-    <div class="cards-grid" id="cardsGrid">
-      <!-- 絵札カードをここにJSで生成 -->
-    </div>
-
-    <div class="info-bar">
-      <span class="timer">タイマー：<span id="timerText">--.-</span> 秒</span>
-      <span class="score">スコア：<span id="scoreText">0</span> 点</span>
-    </div>
-
-    <div class="message" id="message"></div>
-
-    <div class="explanation" id="explanation" style="display:none;"></div>
-
-    <div class="buttons">
-      <button class="btn" id="nextButton" style="display:none;">次の問題へ</button>
-    </div>
-
-    <div class="final-result" id="finalResult"></div>
-  </div>
-
-  <script>
-    // ====== 設定値（ここを変えればルール調整できます） ======
-    const MAX_TIME_MS = 10000;         // 絵札表示からの制限時間（ミリ秒）
-    const POINTS_PER_SECOND = 10;      // 1秒あたりの加点
-    const WRONG_PENALTY = -20;         // 不正解 & 時間切れペナルティ
-
-    // ====== 問題データ（サンプル1問。あとで増やせます） ======
-    // images/ フォルダの中に、実際の絵札画像ファイルを置いてください。
-    // src のファイル名は、実際にアップロードする名前に合わせて変更してください。
-    const questions = [
-      {
-        id: "a",
-        leadingKana: "あ",
-        fullPhrase: "あ：あかんもんはあかん",
-        explanation:
-          "【サンプル】ここに「あ：あかんもんはあかん」の解説文を入れてください。PDFの本文からコピペしてOKです。",
-        cards: [
-          { src: "images/a_1.jpg", alt: "正解の絵札（サンプル）", isCorrect: true },
-          { src: "images/a_2.jpg",  alt: "不正解1（サンプル）", isCorrect: false },
-          { src: "images/a_3.jpg",  alt: "不正解2（サンプル）", isCorrect: false },
-          { src: "images/a_4.jpg",  alt: "不正解3（サンプル）", isCorrect: false }
-        ]
-      }
-      // ここに B, C, ... の問題を同じ形で追加していきます
-    ];
-
-    // ====== 状態管理用変数 ======
-    let currentIndex = 0;
-    let score = 0;
-    let canAnswer = false;
-    let hasAnswered = false;
-    let timerId = null;
-    let questionStartTime = null;
-
-    // ====== DOM 取得 ======
-    const leadingKanaEl = document.getElementById("leadingKana");
-    const fullPhraseEl = document.getElementById("fullPhrase");
-    const cardsGridEl = document.getElementById("cardsGrid");
-    const timerTextEl = document.getElementById("timerText");
-    const scoreTextEl = document.getElementById("scoreText");
-    const messageEl = document.getElementById("message");
-    const explanationEl = document.getElementById("explanation");
-    const nextButtonEl = document.getElementById("nextButton");
-    const questionCountEl = document.getElementById("questionCount");
-    const progressEl = document.getElementById("progress");
-    const finalResultEl = document.getElementById("finalResult");
-
-    // ====== ユーティリティ ======
-    function shuffleArray(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
-
-    function resetTimer() {
-      if (timerId !== null) {
-        clearInterval(timerId);
-        timerId = null;
-      }
-      timerTextEl.textContent = "--.-";
-    }
-
-    function updateTimer() {
-      if (!questionStartTime) return;
-      const elapsed = Date.now() - questionStartTime;
-      const remaining = Math.max(0, MAX_TIME_MS - elapsed);
+    if (isCorrect) {
       const sec = remaining / 1000;
-      timerTextEl.textContent = sec.toFixed(1);
+      deltaScore = Math.round(sec) * POINTS_PER_SECOND;
+      score += deltaScore;
 
-      if (remaining <= 0 && !hasAnswered) {
-        // 時間切れ処理
-        handleTimeout();
+      cardEl.classList.add("correct");
+      setMessage(`正解！ +${deltaScore} 点`, "ok");
+    } else {
+      deltaScore = WRONG_PENALTY;
+      score += deltaScore;
+      cardEl.classList.add("wrong");
+      setMessage(`残念… ${WRONG_PENALTY} 点`, "ng");
+    }
+
+    scoreTextEl.textContent = score.toString();
+
+    // 解説表示
+    const q = getCurrentQuestion();
+    explanationEl.textContent = q.explanation;
+    explanationEl.style.display = "block";
+
+    // 最後の問題かどうかでボタンの文言変更
+    if (currentIndex < questionOrder.length - 1) {
+      nextButtonEl.textContent = "次の問題へ";
+    } else {
+      nextButtonEl.textContent = "結果を見る";
+    }
+    nextButtonEl.style.display = "inline-block";
+  }
+
+  function handleTimeout() {
+    if (hasAnswered) return;
+    hasAnswered = true;
+    canAnswer = false;
+    stopTimer();
+
+    const allCards = cardsGridEl.querySelectorAll(".card");
+    allCards.forEach(c => c.classList.add("disabled"));
+
+    allCards.forEach(c => {
+      if (c.dataset.correct === "1") {
+        c.classList.add("correct");
       }
+    });
+
+    score += WRONG_PENALTY;
+    scoreTextEl.textContent = score.toString();
+    setMessage(`時間切れ！ ${WRONG_PENALTY} 点`, "ng");
+
+    const q = getCurrentQuestion();
+    explanationEl.textContent = q.explanation;
+    explanationEl.style.display = "block";
+
+    if (currentIndex < questionOrder.length - 1) {
+      nextButtonEl.textContent = "次の問題へ";
+    } else {
+      nextButtonEl.textContent = "結果を見る";
     }
+    nextButtonEl.style.display = "inline-block";
+  }
 
-    function startTimer() {
-      resetTimer();
-      questionStartTime = Date.now();
-      timerId = setInterval(updateTimer, 100);
-    }
-
-    function stopTimer() {
-      if (timerId !== null) {
-        clearInterval(timerId);
-        timerId = null;
-      }
-    }
-
-    function setMessage(text, type) {
-      messageEl.textContent = text;
-      messageEl.classList.remove("ok", "ng");
-      if (type === "ok") messageEl.classList.add("ok");
-      if (type === "ng") messageEl.classList.add("ng");
-    }
-
-    // ====== 問題表示ロジック ======
-    function showQuestion(index) {
-      const q = questions[index];
-      if (!q) return;
-
-      // 状態リセット
-      canAnswer = false;
-      hasAnswered = false;
-      resetTimer();
-      setMessage("", null);
-      explanationEl.style.display = "none";
-      explanationEl.textContent = "";
+  function goToNext() {
+    if (currentIndex < questionOrder.length - 1) {
+      currentIndex += 1;
+      showQuestion();
+    } else {
+      finalResultEl.textContent =
+        `全${questions.length}問終了！ あなたのあきんどスコアは ${score} 点です。`;
       nextButtonEl.style.display = "none";
-      finalResultEl.textContent = "";
-
-      // 進捗表示
-      questionCountEl.textContent = `第${index + 1}問`;
-      progressEl.textContent = `${index + 1} / ${questions.length}`;
-
-      // 0秒：先頭1文字だけ表示
-      leadingKanaEl.textContent = q.leadingKana;
-      fullPhraseEl.textContent = "";
-
-      // カードは一旦クリア
-      cardsGridEl.innerHTML = "";
-
-      // 1秒後：カード4枚を表示して回答可能に＆タイマー開始
-      setTimeout(() => {
-        renderCards(q);
-        canAnswer = true;
-        startTimer();
-      }, 1000);
-
-      // 2秒後：フルのセリフを表示
-      setTimeout(() => {
-        fullPhraseEl.textContent = q.fullPhrase;
-      }, 2000);
     }
+  }
 
-    function renderCards(question) {
-      cardsGridEl.innerHTML = "";
+  nextButtonEl.addEventListener("click", goToNext);
 
-      const shuffledCards = shuffleArray(question.cards).map((card, idx) => {
-        return { ...card, viewIndex: idx };
-      });
+  // ====== ゲーム開始 ======
+  function startGame() {
+    score = 0;
+    scoreTextEl.textContent = "0";
 
-      shuffledCards.forEach(card => {
-        const cardEl = document.createElement("div");
-        cardEl.className = "card";
-        cardEl.dataset.correct = card.isCorrect ? "1" : "0";
-
-        const coverEl = document.createElement("div");
-        coverEl.className = "kana-cover";
-
-        const imgEl = document.createElement("img");
-        imgEl.src = card.src;
-        imgEl.alt = card.alt;
-
-        cardEl.appendChild(imgEl);
-        cardEl.appendChild(coverEl);
-
-        cardEl.addEventListener("click", () => {
-          handleAnswer(cardEl, card.isCorrect);
-        });
-
-        cardsGridEl.appendChild(cardEl);
-      });
+    // 出題順をランダムに決定
+    const indices = [];
+    for (let i = 0; i < questions.length; i++) {
+      indices.push(i);
     }
+    questionOrder = shuffleArray(indices);
+    currentIndex = 0;
 
-    // ====== 回答処理 ======
-    function handleAnswer(cardEl, isCorrect) {
-      if (!canAnswer || hasAnswered) return;
+    showQuestion();
+  }
 
-      hasAnswered = true;
-      canAnswer = false;
-      stopTimer();
-
-      const elapsed = Date.now() - questionStartTime;
-      const remaining = Math.max(0, MAX_TIME_MS - elapsed);
-      let deltaScore = 0;
-
-      // すべてのカードをdisabledに
-      const allCards = cardsGridEl.querySelectorAll(".card");
-      allCards.forEach(c => c.classList.add("disabled"));
-
-      // 正解カードをハイライト
-      allCards.forEach(c => {
-        if (c.dataset.correct === "1") {
-          c.classList.add("correct");
-        }
-      });
-
-      if (isCorrect) {
-        const sec = remaining / 1000;
-        deltaScore = Math.round(sec) * POINTS_PER_SECOND;
-        score += deltaScore;
-
-        cardEl.classList.add("correct");
-        setMessage(`正解！ +${deltaScore} 点`, "ok");
-      } else {
-        deltaScore = WRONG_PENALTY;
-        score += deltaScore;
-        cardEl.classList.add("wrong");
-        setMessage(`残念… ${WRONG_PENALTY} 点`, "ng");
-      }
-
-      scoreTextEl.textContent = score.toString();
-
-      // 解説表示
-      const q = questions[currentIndex];
-      explanationEl.textContent = q.explanation;
-      explanationEl.style.display = "block";
-
-      // 最後の問題かどうかでボタンの文言変更
-      if (currentIndex < questions.length - 1) {
-        nextButtonEl.textContent = "次の問題へ";
-      } else {
-        nextButtonEl.textContent = "結果を見る";
-      }
-      nextButtonEl.style.display = "inline-block";
-    }
-
-    function handleTimeout() {
-      if (hasAnswered) return;
-      hasAnswered = true;
-      canAnswer = false;
-      stopTimer();
-
-      // すべてのカードをdisabledに
-      const allCards = cardsGridEl.querySelectorAll(".card");
-      allCards.forEach(c => c.classList.add("disabled"));
-
-      // 正解カードをハイライト
-      allCards.forEach(c => {
-        if (c.dataset.correct === "1") {
-          c.classList.add("correct");
-        }
-      });
-
-      score += WRONG_PENALTY;
-      scoreTextEl.textContent = score.toString();
-      setMessage(`時間切れ！ ${WRONG_PENALTY} 点`, "ng");
-
-      const q = questions[currentIndex];
-      explanationEl.textContent = q.explanation;
-      explanationEl.style.display = "block";
-
-      if (currentIndex < questions.length - 1) {
-        nextButtonEl.textContent = "次の問題へ";
-      } else {
-        nextButtonEl.textContent = "結果を見る";
-      }
-      nextButtonEl.style.display = "inline-block";
-    }
-
-    function goToNext() {
-      if (currentIndex < questions.length - 1) {
-        currentIndex += 1;
-        showQuestion(currentIndex);
-      } else {
-        // 結果表示
-        finalResultEl.textContent = `全${questions.length}問終了！ あなたのあきんどスコアは ${score} 点です。`;
-        nextButtonEl.style.display = "none";
-      }
-    }
-
-    nextButtonEl.addEventListener("click", goToNext);
-
-    // ====== ゲーム開始 ======
-    function startGame() {
-      currentIndex = 0;
-      score = 0;
-      scoreTextEl.textContent = "0";
-      showQuestion(currentIndex);
-    }
-
-    // 初期化
-    startGame();
-  </script>
-</body>
-</html>
+  // 初期化
+  startGame();
+</script>
