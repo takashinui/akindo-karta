@@ -24,7 +24,7 @@
       text-align: center;
       font-size: 30px;
       font-weight: bold;
-      margin: 4px 0;
+      margin: 0px 0;
     }
 
     /* fullPhrase の表示領域 */
@@ -900,25 +900,26 @@
       explanationEl.style.display = "block";
     }
 
-        function startGame() {
+ function startGame() {
       shuffleOrder();
       currentIndex = 0;
       console.log("questions:", questions.length, "問");
 
       const nextBtn = document.getElementById("nextButton");
 
-      function handleNext() {
+      function handleNext(e) {
+        if (e) e.preventDefault();              // iOS の二度タップ防止
         nextQuestionIndex();
         showQuestion();
+        // 画面の一番上へ
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
-      // iPhone を含めたタッチ端末では pointerup を優先
-      if (window.PointerEvent) {
-        nextBtn.addEventListener("pointerup", handleNext);
-      } else {
-        nextBtn.addEventListener("click", handleNext);
-      }
+      // タッチ端末向け：touchend で即座に反応させる
+      nextBtn.addEventListener("touchend", handleNext, { passive: false });
+
+      // PC などマウス用の click も残しておく
+      nextBtn.addEventListener("click", handleNext);
 
       showQuestion();
     }
