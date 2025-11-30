@@ -1,339 +1,237 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>あきんどカルタゲーム</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>あきんどカルタ</title>
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f5;
-      color: #222;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 12px;
-    }
+<style>
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    background: #f5f5f5;
+  }
 
-    .game-container {
-      width: 100%;
-      max-width: 480px;
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      padding: 16px 16px 20px;
-    }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 12px;
+  }
 
-    header {
-      text-align: center;
-      margin-bottom: 12px;
-    }
+  .title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
 
-    header h1 {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
+  /* fullPhrase 用に固定高さを確保 */
+  #fullPhrase {
+    min-height: 3.5em;   /* 高さ確保（調整可能） */
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    padding: 4px;
+    margin-bottom: 8px;
+  }
 
-    header p {
-      font-size: 12px;
-      color: #666;
-    }
+  #currentKana {
+    text-align: center;
+    font-size: 42px;
+    font-weight: bold;
+    margin: 8px 0;
+  }
 
-    .status-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      margin-bottom: 8px;
-      color: #555;
-    }
+  /* カードグリッド */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
 
-    .status-bar span {
-      min-width: 80px;
-    }
+  .card {
+    position: relative;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
 
-    .leading-kana {
-      text-align: center;
-      margin: 8px 0;
-      font-size: 40px;
-      font-weight: bold;
-    }
+  .card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 
-    .full-phrase {
-      text-align: center;
-      margin: 4px 0 10px;
-      min-height: 24px;
-      font-size: 14px;
-      color: #333;
-    }
+  /* 黒丸を塗りつぶして元のひらがなを消す */
+  .kana-mask {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 32px;
+    height: 32px;
+    background: black;     /* 黒丸で塗りつぶす */
+    border-radius: 50%;
+    opacity: 1;
+  }
 
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .card {
-      position: relative;
-      background: #fafafa;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
-      min-height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: cover;
-    }
-
-    .card.disabled {
-      cursor: default;
-      opacity: 0.7;
-    }
-
-    .card:hover:not(.disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-    }
-
-    .card.correct {
-      border-color: #2e7d32;
-    }
-
-    .card.wrong {
-      border-color: #c62828;
-    }
-
-    .kana-cover {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 56px;
-      height: 56px;
-      background: #ffffff;
-      box-shadow: 0 0 4px rgba(255,255,255,0.8);
-    }
-
-    .info-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      margin: 6px 0;
-      color: #555;
-    }
-
-    .timer {
-      font-variant-numeric: tabular-nums;
-    }
-
-    .score {
-      font-variant-numeric: tabular-nums;
-      font-weight: 600;
-    }
-
-    .message {
-      min-height: 20px;
-      font-size: 13px;
-      margin: 4px 0;
-    }
-
-    .message.ok {
-      color: #2e7d32;
-    }
-
-    .message.ng {
-      color: #c62828;
-    }
-
-    .explanation {
-      margin-top: 6px;
-      font-size: 12px;
-      line-height: 1.5;
-      background: #f8f8f8;
-      border-radius: 8px;
-      padding: 8px;
-      max-height: 140px;
-      overflow-y: auto;
-    }
-
-    .buttons {
-      margin-top: 10px;
-      display: flex;
-      justify-content: center;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 20px;
-      font-size: 14px;
-      cursor: pointer;
-      background: #1976d2;
-      color: #fff;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      transition: opacity 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: default;
-      box-shadow: none;
-      transform: none;
-    }
-
-    .btn:not(:disabled):active {
-      transform: translateY(1px);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
-    }
-
-    .final-result {
-      margin-top: 8px;
-      font-size: 13px;
-      text-align: center;
-      color: #333;
-    }
-
-    @media (max-width: 360px) {
-      .game-container {
-        padding: 12px;
-      }
-      .leading-kana {
-        font-size: 32px;
-      }
-    }
-  </style>
+  /* 解説エリア（画面固定サイズ） */
+  #explanation {
+    display: none;
+    background: #fff;
+    padding: 10px;
+    margin-top: 12px;
+    border-radius: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+</style>
 </head>
+
 <body>
-  <div class="game-container">
-    <header>
-      <h1>あきんどカルタ</h1>
-      <p>「あきんどの精神」を学ぶカルタゲーム</p>
-    </header>
+<div class="container">
+  <div class="title">あきんどカルタ</div>
 
-    <div class="status-bar">
-      <span id="questionCount">第1問</span>
-      <span id="progress"></span>
-    </div>
+  <div id="currentKana"></div>
 
-    <div class="leading-kana" id="leadingKana">あ</div>
-    <div class="full-phrase" id="fullPhrase"></div>
+  <!-- fullPhrase のための固定領域 -->
+  <div id="fullPhrase"></div>
 
-    <div class="cards-grid" id="cardsGrid">
-      <!-- 絵札カードをここにJSで生成 -->
-    </div>
+  <div class="cards" id="cards"></div>
 
-    <div class="info-bar">
-      <span class="timer">タイマー：<span id="timerText">--.-</span> 秒</span>
-      <span class="score">スコア：<span id="scoreText">0</span> 点</span>
-    </div>
+  <div id="explanation"></div>
+</div>
 
-    <div class="message" id="message"></div>
+<script>
+/* ------- 時間設定（ms） ------- */
+const FULL_PHRASE_DELAY = 3000;   // 3秒後に fullPhrase を表示
 
-    <div class="explanation" id="explanation" style="display:none;"></div>
+/* ------- 既存の questions 配列はそのまま再利用 ------- */
+// const questions = [ ... 全46札 ... ];
 
-    <div class="buttons">
-      <button class="btn" id="nextButton" style="display:none;">次の問題へ</button>
-    </div>
+let currentIndex = 0;
 
-    <div class="final-result" id="finalResult"></div>
-  </div>
+/* ランダム並び */
+const order = [...Array(questions.length).keys()]
+  .sort(() => Math.random() - 0.5);
 
-  <script>
-    // ====== 設定値 ======
-    const MAX_TIME_MS = 10000;         // 絵札表示からの制限時間（ミリ秒）
-    const POINTS_PER_SECOND = 10;      // 1秒あたりの加点
-    const WRONG_PENALTY = -20;         // 不正解 & 時間切れペナルティ
+/* --------------------------------------
+   出題処理
+-------------------------------------- */
+function showQuestion() {
+  const q = questions[ order[currentIndex] ];
 
-    // ====== 使うかなの一覧 ======
-    const kanaList = [
-      "あ","い","う","え","お",
-      "か","き","く","け","こ",
-      "さ","し","す","せ","そ",
-      "た","ち","つ","て","と",
-      "な","に","ぬ","ね","の",
-      "は","ひ","ふ","へ","ほ",
-      "ま","み","む","め","も",
-      "や","ゆ","よ",
-      "ら","り","る","れ","ろ",
-      "わ","を","ん"
-    ];
+  // 説明は非表示に戻す
+  const exp = document.getElementById("explanation");
+  exp.style.display = "none";
+  exp.textContent = "";
 
-    // かな → ファイル名のキー（.jpg は後で付ける）
-    const kanaToFileKey = {
-      "あ": "a",
-      "い": "i",
-      "う": "u",
-      "え": "e",
-      "お": "o",
+  // 文字表示
+  const kanaEl = document.getElementById("currentKana");
+  kanaEl.textContent = q.leadingKana;
 
-      "か": "ka",
-      "き": "ki",
-      "く": "ku",
-      "け": "ke",
-      "こ": "ko",   // 札は「ご」だがファイル名は ko.jpg
+  // fullPhrase をまだ表示しない（空のまま）
+  const fp = document.getElementById("fullPhrase");
+  fp.textContent = "";
 
-      "さ": "sa",
-      "し": "si",
-      "す": "su",
-      "せ": "se",
-      "そ": "so",
+  // 絵札4枚を生成（正解＋誤答ランダム3）
+  createCards(q);
 
-      "た": "ta",
-      "ち": "ti",
-      "つ": "tu",
-      "て": "te",
-      "と": "to",
+  // 3秒後に fullPhrase 表示
+  setTimeout(() => {
+    fp.textContent = q.fullPhrase;
+  }, FULL_PHRASE_DELAY);
+}
 
-      "な": "na",
-      "に": "ni",
-      "ぬ": "nu",
-      "ね": "ne",
-      "の": "no",
+/* --------------------------------------
+   絵札生成処理
+-------------------------------------- */
+function createCards(q) {
+  const cardArea = document.getElementById("cards");
+  cardArea.innerHTML = "";
 
-      "は": "ha",
-      "ひ": "hi",
-      "ふ": "hu",
-      "へ": "he",
-      "ほ": "ho",
+  const correctKana = q.kana;
 
-      "ま": "ma",
-      "み": "mi",
-      "む": "mu",
-      "め": "me",
-      "も": "mo",
+  // すべてのかなから正解以外を抽出
+  const allKana = questions.map(x => x.kana);
+  const wrongList = allKana.filter(k => k !== correctKana);
 
-      "や": "ya",
-      "ゆ": "yu",
-      "よ": "yo",
+  // ランダムに3つ選ぶ
+  const wrong3 = wrongList
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3);
 
-      "ら": "ra",
-      "り": "ri",
-      "る": "ru",
-      "れ": "re",
-      "ろ": "ro",
+  // 正解＋誤答を混ぜる
+  const choices = [correctKana, ...wrong3]
+      .sort(() => Math.random() - 0.5);
 
-      "わ": "wa",
-      "を": "wo",
-      "ん": "n"
+  choices.forEach(k => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    const img = document.createElement("img");
+    img.src = `images/${kanaToFile(k)}`;
+
+    const mask = document.createElement("div");
+    mask.className = "kana-mask";
+
+    div.appendChild(img);
+    div.appendChild(mask);
+
+    div.onclick = () => {
+      if (k === correctKana) showExplanation(q);
+      nextQuestion();
     };
+
+    cardArea.appendChild(div);
+  });
+}
+
+/* ---------- かな → ファイル名 ---------- */
+function kanaToFile(k) {
+  const map = {
+    "あ":"a.jpg","い":"i.jpg","う":"u.jpg","え":"e.jpg","お":"o.jpg",
+    "か":"ka.jpg","き":"ki.jpg","く":"ku.jpg","け":"ke.jpg","こ":"ko.jpg",
+    "さ":"sa.jpg","し":"si.jpg","す":"su.jpg","せ":"se.jpg","そ":"so.jpg",
+    "た":"ta.jpg","ち":"ti.jpg","つ":"tu.jpg","て":"te.jpg","と":"to.jpg",
+    "な":"na.jpg","に":"ni.jpg","ぬ":"nu.jpg","ね":"ne.jpg","の":"no.jpg",
+    "は":"ha.jpg","ひ":"hi.jpg","ふ":"hu.jpg","へ":"he.jpg","ほ":"ho.jpg",
+    "ま":"ma.jpg","み":"mi.jpg","む":"mu.jpg","め":"me.jpg","も":"mo.jpg",
+    "や":"ya.jpg","ゆ":"yu.jpg","よ":"yo.jpg",
+    "ら":"ra.jpg","り":"ri.jpg","る":"ru.jpg","れ":"re.jpg","ろ":"ro.jpg",
+    "わ":"wa.jpg","を":"wo.jpg","ん":"n.jpg"
+  };
+  return map[k];
+}
+
+/* --------------------------------------
+   解説表示
+-------------------------------------- */
+function showExplanation(q) {
+  const exp = document.getElementById("explanation");
+  exp.textContent = q.explanation;
+  exp.style.display = "block";
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= questions.length) {
+    currentIndex = 0;
+    order.sort(() => Math.random() - 0.5);
+  }
+  showQuestion();
+}
+
+/* スタート */
+showQuestion();
+</script>
+</body>
+</html>
 
     // ====== 問題データ======
    const questions = [
