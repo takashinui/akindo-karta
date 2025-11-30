@@ -106,17 +106,20 @@
 
 <body>
   <div class="container">
-    <!-- 問題の文字（かな1文字） -->
-    <div id="currentKana"></div>
+<div id="currentKana"></div>
 
-    <!-- fullPhrase 用の固定領域（高さだけ先に確保） -->
-    <div id="fullPhrase"></div>
+<!-- 先に絵札 -->
+<div class="cards" id="cards"></div>
 
-    <!-- 絵札4枚 -->
-    <div class="cards" id="cards"></div>
+<!-- 絵札の下に fullPhrase -->
+<div id="fullPhrase"></div>
 
-    <!-- 解説 -->
-    <div id="explanation"></div>
+<!-- fullPhrase の下に解説 -->
+<div id="explanation"></div>
+
+<!-- 解説のさらに下に「次の問題」ボタン -->
+<button id="nextButton" style="display:none;">次の問題</button>
+
   </div>
 
   <script>
