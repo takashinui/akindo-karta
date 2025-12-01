@@ -869,6 +869,9 @@
           if (hasAnswered && k !== correctKana) return;
 
           if (k === correctKana) {
+              // ★ 正解したら4枚すべての黒丸マスクを消す
+document.querySelectorAll(".kana-mask").forEach(m => m.style.display = "none");
+            
             // 正解
             hasAnswered = true;
             mark.textContent = "〇";
