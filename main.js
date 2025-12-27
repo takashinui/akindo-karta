@@ -148,10 +148,9 @@ function showFullPhraseAndExplanation(q) {
 }
 
 // ==============================
-// ③ Safariの「2度タップ」対策：touchend + click 両対応しつつ二重発火ガード
+// ③ Safari「2度タップ」対策：pointerup + click + フォーカス解除
 // ==============================
 let nextButtonWired = false;
-let lastNextAt = 0;
 
 function enableNextButton() {
   if (nextButtonWired) return;
@@ -174,19 +173,17 @@ function enableNextButton() {
 
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    // Safari対策の要点：即フォーカス解除
     setTimeout(() => {
       try { nextBtn.blur(); } catch (_) {}
       locked = false;
     }, 50);
   }
 
-  // ★ iOS Safari / PC 共通で一発反応
   nextBtn.addEventListener("pointerup", goNext);
-
-  // 念のための保険（PC向け）
   nextBtn.addEventListener("click", goNext);
 }
+
+ 
 
 function startGame() {
   shuffleOrder();
