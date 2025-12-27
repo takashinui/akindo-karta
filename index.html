@@ -60,18 +60,21 @@
     }
 
     /* ② 黒丸マスク：px固定をやめて、画面サイズに追従させる */
-    .kana-mask {
-      position: absolute;
-      top: 3%;
-      right: 3%;
-      width: clamp(22px, 6vw, 40px);
-      height: clamp(22px, 6vw, 40px);
-      background: black;
-      border-radius: 50%;
-      opacity: 1;
-      pointer-events: none;
-    }
-
+ 
+.kana-mask {
+  position: absolute;
+  inset: 0;                 /* ← ここが決定打 */
+  background: black;
+  border-radius: 50%;
+  opacity: 1;
+  pointer-events: none;
+}
+.image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+    
     /* 〇✕表示（大きさはここ） */
     .result-mark {
       position: absolute;
