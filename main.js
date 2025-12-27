@@ -110,13 +110,15 @@ function createCards(q) {
         });
 
         showFullPhraseAndExplanation(q);
-      } else {
-        mark.textContent = "✕";
-        mark.classList.add("mark-wrong");
+} else {
+  mark.textContent = "✕";
+  mark.classList.add("mark-wrong");
 
-        // 不正解でも説明は出す（今の仕様ならここは好みで変更可）
-        showFullPhraseAndExplanation(q);
-      }
+  // 不正解は ✕ だけ表示して止める（答え・解説は出さない）
+  // ここでは何もしない
+}
+    
+    
     };
 
     cardsEl.appendChild(cardDiv);
