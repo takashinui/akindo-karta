@@ -158,35 +158,34 @@ function enableNextButton() {
   nextButtonWired = true;
 
   const nextBtn = document.getElementById("nextButton");
+  let locked = false;
 
   function goNext(e) {
-    // 二重発火ガード
-    const now = Date.now();
-    if (now - lastNextAt < 350) return;
-    lastNextAt = now;
+    if (locked) return;
+    locked = true;
 
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
 
-    // 次の問題へ
     nextQuestionIndex();
     showQuestion();
 
-    // 画面上へ
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    // iOSの「フォーカスだけ当たる」感を減らす
-    try { nextBtn.blur(); } catch (_) {}
+    // Safari対策の要点：即フォーカス解除
+    setTimeout(() => {
+      try { nextBtn.blur(); } catch (_) {}
+      locked = false;
+    }, 50);
   }
 
-  // iOS Safari で click が遅い/効かない系を吸う
-  nextBtn.addEventListener("touchend", goNext, { passive: false });
-  // PC/その他
-  nextBtn.addEventListener("click", goNext);
+  // ★ iOS Safari / PC 共通で一発反応
+  nextBtn.addEventListener("pointerup", goNext);
 
-  // タップ最適化（CSS側でも touch-action を入れる）
+  // 念のための保険（PC向け）
+  nextBtn.addEventListener("click", goNext);
 }
 
 function startGame() {
