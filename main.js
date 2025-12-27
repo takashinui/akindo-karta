@@ -86,9 +86,14 @@ function createCards(q) {
     // 〇✕表示
     const mark = document.createElement("div");
     mark.className = "result-mark";
+const wrapper = document.createElement("div");
+wrapper.className = "image-wrapper";
 
-    cardDiv.appendChild(img);
-    cardDiv.appendChild(mask);
+wrapper.appendChild(img);
+wrapper.appendChild(mask);
+
+cardDiv.appendChild(wrapper);
+cardDiv.appendChild(mark);
     cardDiv.appendChild(mark);
 
    cardDiv.onclick = () => {
