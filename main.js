@@ -91,35 +91,36 @@ function createCards(q) {
     cardDiv.appendChild(mask);
     cardDiv.appendChild(mark);
 
-    cardDiv.onclick = () => {
-      if (hasAnswered) return;
-      hasAnswered = true;
+   cardDiv.onclick = () => {
+  if (hasAnswered) return;
 
-      const isCorrect = (k === correctKana);
+  const isCorrect = (k === correctKana);
 
-      // クリック後はカードを二度押しできないように（体感の誤爆防止）
-      document.querySelectorAll(".card").forEach(c => (c.style.pointerEvents = "none"));
+  if (isCorrect) {
+    hasAnswered = true;
 
-      if (isCorrect) {
-        mark.textContent = "◯";
-        mark.classList.add("mark-correct");
+    // 正解したら全カードを無効化
+    document.querySelectorAll(".card").forEach(c => {
+      c.style.pointerEvents = "none";
+    });
 
-        // ✅ 正解したら「4つ全部」黒丸を消す（あなたの最新版仕様）
-        document.querySelectorAll(".kana-mask").forEach(m => {
-          m.style.display = "none";
-        });
+    mark.textContent = "◯";
+    mark.classList.add("mark-correct");
 
-        showFullPhraseAndExplanation(q);
-} else {
-  mark.textContent = "✕";
-  mark.classList.add("mark-wrong");
+    // 黒丸をすべて外す
+    document.querySelectorAll(".kana-mask").forEach(m => {
+      m.style.display = "none";
+    });
 
-  // 不正解は ✕ だけ表示して止める（答え・解説は出さない）
-  // ここでは何もしない
-}
-    
-    
-    };
+    showFullPhraseAndExplanation(q);
+
+  } else {
+    mark.textContent = "✕";
+    mark.classList.add("mark-wrong");
+
+    // 何もしない（選び直し可）
+  }
+};
 
     cardsEl.appendChild(cardDiv);
   });
