@@ -198,10 +198,6 @@ function startGame() {
   showQuestion();
 }
 
-window.addEventListener("load", () => {
-  showMenu();
-});
-
 function showMenu() {
   document.getElementById("menuView").hidden = false;
   document.getElementById("gameView").hidden = true;
@@ -210,13 +206,16 @@ function showMenu() {
 function showGame() {
   document.getElementById("menuView").hidden = true;
   document.getElementById("gameView").hidden = false;
-
-  // 今まで通りゲーム開始
-  startGame();
+    startGame();
 }
+  
+window.addEventListener("load", () => {
+  showMenu();
+});
 document.getElementById("startGameBtn")
   ?.addEventListener("click", showGame);
 
 document.querySelectorAll(".backToMenu")
   .forEach(btn => btn.addEventListener("click", showMenu));
+
 
