@@ -136,18 +136,29 @@
 </head>
 
 <body>
-  <div class="container">
-    <div id="currentKana"></div>
+  <div id="menuView" class="container">
+    <h1 style="text-align:center;">あきんどカルタ</h1>
 
-    <div class="cards" id="cards"></div>
+    <section id="dailyCardSection">
+      <h2 style="font-size:16px;">今日のカルタ</h2>
+      <div id="dailyCardPreview"></div>
+    </section>
 
-    <div id="fullPhrase"></div>
-
-    <div id="explanation"></div>
-
-    <button id="nextButton">次の問題</button>
+    <div style="margin-top:24px; display:flex; flex-direction:column; gap:12px;">
+      <button id="startGameBtn">4択カルタで遊ぶ</button>
+      <button id="openBookBtn">あきんどカルタ読本</button>
+    </div>
   </div>
+  
+<div id="gameView" class="container" hidden>
+  <button class="backToMenu">← トップへ戻る</button>
 
+  <div id="currentKana"></div>
+  <div class="cards" id="cards"></div>
+  <div id="fullPhrase"></div>
+  <div id="explanation"></div>
+  <button id="nextButton">次の問題</button>
+</div>
   <!-- ★ ここが重要：main.js が questions.js を import する -->
   <script type="module" src="./main.js"></script>
 </body>
