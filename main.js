@@ -208,10 +208,77 @@ function showGame() {
   document.getElementById("gameView").hidden = false;
     startGame();
 }
-  
+
+function getTodayKey() {
+  const now = new Date();
+  return now.getFullYear() + "-" +
+         (now.getMonth() + 1) + "-" +
+         now.getDate();
+}
+
+function getTodayCardIndex() {
+  const key = "todayCard-" + getTodayKey();
+  const saved = localStorage.getItem(key);
+
+  if (saved !== null) {
+    return Number(saved);
+  }
+
+  const index = Math.floor(Math.random() * questions.length);
+  localStorage.setItem(key, index);
+  return index;
+}
+function renderDailyCard() {
+  const container = document.getElementById("dailyCardPreview");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const q = questions[getTodayCardIndex()];
+
+  const img = document.createElement("img");
+  img.src = "images/" + kanaToFile(q.kana);
+  img.alt = q.kana;
+  img.style.width = "100%";
+  img.style.cursor = "pointer";
+
+  container.appendChild(img);
+
+  img.addEventListener("click", () => {
+    showDailyCardDetail(q);
+  });
+}
+
+function showDailyCardDetail(q) {
+  const section = document.getElementById("dailyCardSection");
+
+  // すでに詳細が出ていたら何もしない
+  if (section.querySelector(".daily-detail")) return;
+
+  const detail = document.createElement("div");
+  detail.className = "daily-detail";
+  detail.style.marginTop = "8px";
+  detail.style.background = "#fff";
+  detail.style.padding = "10px";
+  detail.style.borderRadius = "10px";
+  detail.style.boxShadow = "0 1px 3px rgba(0,0,0,0.2)";
+
+  detail.innerHTML = `
+    <div style="font-weight:bold; margin-bottom:4px;">
+      ${q.fullPhrase}
+    </div>
+    <div style="font-size:14px; line-height:1.5;">
+      ${q.explanation}
+    </div>
+  `;
+
+  section.appendChild(detail);
+}
+
+
 window.addEventListener("load", () => {
   showMenu();
-
+renderDailyCard();
   document.getElementById("startGameBtn")
     ?.addEventListener("click", showGame);
 
