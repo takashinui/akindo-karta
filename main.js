@@ -209,6 +209,13 @@ function showGame() {
     startGame();
 }
 
+function showBook() {
+  document.getElementById("menuView").hidden = true;
+  document.getElementById("gameView").hidden = true;
+  document.getElementById("bookView").hidden = false;
+}
+
+
 function getTodayKey() {
   const now = new Date();
   return now.getFullYear() + "-" +
@@ -275,13 +282,13 @@ function showDailyCardDetail(q) {
   section.appendChild(detail);
 }
 
-
 window.addEventListener("load", () => {
   showMenu();
 renderDailyCard();
   document.getElementById("startGameBtn")
     ?.addEventListener("click", showGame);
-
   document.querySelectorAll(".backToMenu")
     .forEach(btn => btn.addEventListener("click", showMenu));
+  document.getElementById("openBookBtn")
+  ?.addEventListener("click", showBook);
 });
