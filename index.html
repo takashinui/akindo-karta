@@ -133,11 +133,28 @@
       .cards { gap: 12px; }
     }
 #dailyCardPreview img {
-  width: clamp(80px, 25vw, 140px);
+  width: 25%;
+  max-width: 140px;
   height: auto;
   display: block;
   margin: 0 auto;
 }
+
+/* iPad以上 */
+@media (min-width: 768px) {
+  #dailyCardPreview img {
+    width: 30%;
+    max-width: 220px;
+  }
+}
+
+/* PC以上 */
+@media (min-width: 1024px) {
+  #dailyCardPreview img {
+    width: 280px;
+  }
+}
+
 #menuView button,
 #gameView button.backToMenu {
   padding: 12px 16px;
