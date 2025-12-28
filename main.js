@@ -211,11 +211,10 @@ function showGame() {
   
 window.addEventListener("load", () => {
   showMenu();
+
+  document.getElementById("startGameBtn")
+    ?.addEventListener("click", showGame);
+
+  document.querySelectorAll(".backToMenu")
+    .forEach(btn => btn.addEventListener("click", showMenu));
 });
-document.getElementById("startGameBtn")
-  ?.addEventListener("click", showGame);
-
-document.querySelectorAll(".backToMenu")
-  .forEach(btn => btn.addEventListener("click", showMenu));
-
-
