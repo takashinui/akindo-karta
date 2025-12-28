@@ -157,6 +157,9 @@ function enableNextButton() {
   nextButtonWired = true;
 
   const nextBtn = document.getElementById("nextButton");
+  if (!nextBtn) return;   // ← ★これを必ず入れる
+
+  nextButtonWired = true;
   let locked = false;
 
   function goNext(e) {
