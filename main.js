@@ -170,7 +170,6 @@ function enableNextButton() {
 
     nextQuestionIndex();
     showQuestion();
-
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     setTimeout(() => {
@@ -179,9 +178,15 @@ function enableNextButton() {
     }, 50);
   }
 
-  nextBtn.addEventListener("pointerup", goNext);
+  if (window.PointerEvent) {
+    nextBtn.addEventListener("pointerup", goNext);
+  } else {
+    nextBtn.addEventListener("touchend", goNext, { passive: false });
+  }
+
   nextBtn.addEventListener("click", goNext);
 }
+
 
  
 
