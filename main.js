@@ -198,7 +198,9 @@ function startGame() {
   showQuestion();
 }
 
-window.addEventListener("load", startGame);
+window.addEventListener("load", () => {
+  showMenu();
+});
 
 function showMenu() {
   document.getElementById("menuView").hidden = false;
@@ -212,3 +214,9 @@ function showGame() {
   // 今まで通りゲーム開始
   startGame();
 }
+document.getElementById("startGameBtn")
+  ?.addEventListener("click", showGame);
+
+document.querySelectorAll(".backToMenu")
+  .forEach(btn => btn.addEventListener("click", showMenu));
+
