@@ -139,23 +139,20 @@
   display: block;
   margin: 0 auto;
 }
-
-/* iPad以上 */
-@media (min-width: 768px) {
+/* iPad mini（縦） */
+@media (min-width: 768px) and (max-width: 820px) {
+  #dailyCardPreview img {
+    width: 55%;
+    max-width: 320px;
+  }
+}
+/* iPad以上（mini除く） */
+@media (min-width: 821px) {
   #dailyCardPreview img {
     width: 40%;
-    max-width: 300px;
+    max-width: 280px;
   }
 }
-
-/* PC以上 */
-@media (min-width: 1024px) {
-  #dailyCardPreview img {
-        width: 40%;          /* ← iPadと同じ挙動を維持 */
-    max-width: 280px;   /* ← PCだけ上限を決める */
-  }
-}
-
 #menuView button,
 #gameView button.backToMenu {
   padding: 12px 16px;
