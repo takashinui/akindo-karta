@@ -189,8 +189,6 @@ function enableNextButton() {
 
   nextBtn.addEventListener("click", goNext);
 }
-
-
  
 
 function startGame() {
@@ -201,3 +199,16 @@ function startGame() {
 }
 
 window.addEventListener("load", startGame);
+
+function showMenu() {
+  document.getElementById("menuView").hidden = false;
+  document.getElementById("gameView").hidden = true;
+}
+
+function showGame() {
+  document.getElementById("menuView").hidden = true;
+  document.getElementById("gameView").hidden = false;
+
+  // 今まで通りゲーム開始
+  startGame();
+}
