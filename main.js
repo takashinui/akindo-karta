@@ -6,16 +6,16 @@ import { questions } from "./questions.js";
 // ==============================
 function kanaToFile(k) {
   const map = {
-    "あ":"a.jpg","い":"i.jpg","う":"u.jpg","え":"e.jpg","お":"o.jpg",
-    "か":"ka.jpg","き":"ki.jpg","く":"ku.jpg","け":"ke.jpg","こ":"ko.jpg",
-    "さ":"sa.jpg","し":"si.jpg","す":"su.jpg","せ":"se.jpg","そ":"so.jpg",
-    "た":"ta.jpg","ち":"ti.jpg","つ":"tu.jpg","て":"te.jpg","と":"to.jpg",
-    "な":"na.jpg","に":"ni.jpg","ぬ":"nu.jpg","ね":"ne.jpg","の":"no.jpg",
-    "は":"ha.jpg","ひ":"hi.jpg","ふ":"hu.jpg","へ":"he.jpg","ほ":"ho.jpg",
-    "ま":"ma.jpg","み":"mi.jpg","む":"mu.jpg","め":"me.jpg","も":"mo.jpg",
-    "や":"ya.jpg","ゆ":"yu.jpg","よ":"yo.jpg",
-    "ら":"ra.jpg","り":"ri.jpg","る":"ru.jpg","れ":"re.jpg","ろ":"ro.jpg",
-    "わ":"wa.jpg","を":"wo.jpg","ん":"n.jpg"
+    "あ": "a.jpg", "い": "i.jpg", "う": "u.jpg", "え": "e.jpg", "お": "o.jpg",
+    "か": "ka.jpg", "き": "ki.jpg", "く": "ku.jpg", "け": "ke.jpg", "こ": "ko.jpg",
+    "さ": "sa.jpg", "し": "si.jpg", "す": "su.jpg", "せ": "se.jpg", "そ": "so.jpg",
+    "た": "ta.jpg", "ち": "ti.jpg", "つ": "tu.jpg", "て": "te.jpg", "と": "to.jpg",
+    "な": "na.jpg", "に": "ni.jpg", "ぬ": "nu.jpg", "ね": "ne.jpg", "の": "no.jpg",
+    "は": "ha.jpg", "ひ": "hi.jpg", "ふ": "hu.jpg", "へ": "he.jpg", "ほ": "ho.jpg",
+    "ま": "ma.jpg", "み": "mi.jpg", "む": "mu.jpg", "め": "me.jpg", "も": "mo.jpg",
+    "や": "ya.jpg", "ゆ": "yu.jpg", "よ": "yo.jpg",
+    "ら": "ra.jpg", "り": "ri.jpg", "る": "ru.jpg", "れ": "re.jpg", "ろ": "ro.jpg",
+    "わ": "wa.jpg", "を": "wo.jpg", "ん": "n.jpg"
   };
   return map[k];
 }
@@ -86,45 +86,45 @@ function createCards(q) {
     // 〇✕表示
     const mark = document.createElement("div");
     mark.className = "result-mark";
-const wrapper = document.createElement("div");
-wrapper.className = "image-wrapper";
+    const wrapper = document.createElement("div");
+    wrapper.className = "image-wrapper";
 
-wrapper.appendChild(img);
-wrapper.appendChild(mask);
+    wrapper.appendChild(img);
+    wrapper.appendChild(mask);
 
-cardDiv.appendChild(wrapper);
-cardDiv.appendChild(mark);
+    cardDiv.appendChild(wrapper);
+    cardDiv.appendChild(mark);
 
-   cardDiv.onclick = () => {
-  if (hasAnswered) return;
+    cardDiv.onclick = () => {
+      if (hasAnswered) return;
 
-  const isCorrect = (k === correctKana);
+      const isCorrect = (k === correctKana);
 
-  if (isCorrect) {
-    hasAnswered = true;
+      if (isCorrect) {
+        hasAnswered = true;
 
-    // 正解したら全カードを無効化
-    document.querySelectorAll(".card").forEach(c => {
-      c.style.pointerEvents = "none";
-    });
+        // 正解したら全カードを無効化
+        document.querySelectorAll(".card").forEach(c => {
+          c.style.pointerEvents = "none";
+        });
 
-    mark.textContent = "◯";
-    mark.classList.add("mark-correct");
+        mark.textContent = "◯";
+        mark.classList.add("mark-correct");
 
-    // 黒丸をすべて外す
-    document.querySelectorAll(".kana-mask").forEach(m => {
-      m.style.display = "none";
-    });
+        // 黒丸をすべて外す
+        document.querySelectorAll(".kana-mask").forEach(m => {
+          m.style.display = "none";
+        });
 
-    showFullPhraseAndExplanation(q);
+        showFullPhraseAndExplanation(q);
 
-  } else {
-    mark.textContent = "✕";
-    mark.classList.add("mark-wrong");
+      } else {
+        mark.textContent = "✕";
+        mark.classList.add("mark-wrong");
 
-    // 何もしない（選び直し可）
-  }
-};
+        // 何もしない（選び直し可）
+      }
+    };
 
     cardsEl.appendChild(cardDiv);
   });
@@ -175,7 +175,7 @@ function enableNextButton() {
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     setTimeout(() => {
-      try { nextBtn.blur(); } catch (_) {}
+      try { nextBtn.blur(); } catch (_) { }
       locked = false;
     }, 50);
   }
@@ -188,7 +188,7 @@ function enableNextButton() {
 
   nextBtn.addEventListener("click", goNext);
 }
- 
+
 
 function startGame() {
   shuffleOrder();
@@ -235,8 +235,8 @@ function showBook() {
 function getTodayKey() {
   const now = new Date();
   return now.getFullYear() + "-" +
-         (now.getMonth() + 1) + "-" +
-         now.getDate();
+    (now.getMonth() + 1) + "-" +
+    now.getDate();
 }
 
 function getTodayCardIndex() {
@@ -268,7 +268,7 @@ function renderDailyCard() {
   container.appendChild(img);
 
   img.addEventListener("click", () => {
-     showDailyDetail(q);
+    showDailyDetail(q);
   });
 }
 
@@ -293,11 +293,11 @@ function showDailyDetail(q) {
 
 window.addEventListener("load", () => {
   showMenu();
-renderDailyCard();
+  renderDailyCard();
   document.getElementById("startGameBtn")
     ?.addEventListener("click", showGame);
   document.querySelectorAll(".backToMenu")
     .forEach(btn => btn.addEventListener("click", showMenu));
   document.getElementById("openBookBtn")
-  ?.addEventListener("click", showBook);
+    ?.addEventListener("click", showBook);
 });
