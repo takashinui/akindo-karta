@@ -281,6 +281,24 @@ function showDailyCardDetail(q) {
 
   section.appendChild(detail);
 }
+function showDailyDetail(q) {
+  document.getElementById("menuView").hidden = true;
+  document.getElementById("gameView").hidden = true;
+  document.getElementById("bookView").hidden = true;
+  document.getElementById("dailyDetailView").hidden = false;
+
+  const container = document.getElementById("dailyDetailContent");
+  container.innerHTML = `
+    <img src="images/${kanaToFile(q.kana)}"
+         style="width:100%; max-width:320px; display:block; margin:0 auto 12px;">
+    <div style="font-weight:700; margin-bottom:6px;">
+      ${q.fullPhrase}
+    </div>
+    <div style="line-height:1.6;">
+      ${q.explanation}
+    </div>
+  `;
+}
 
 window.addEventListener("load", () => {
   showMenu();
