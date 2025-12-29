@@ -78,6 +78,7 @@ function createCards(q) {
     const img = document.createElement("img");
     img.src = "images/" + kanaToFile(k);
     img.alt = k;
+    img.loading = "lazy"; 
 
     // 黒丸マスク（②レスポンシブはCSS側で改善）
     const mask = document.createElement("div");
@@ -263,6 +264,7 @@ function renderDailyCard() {
   const img = document.createElement("img");
   img.src = "images/" + kanaToFile(q.kana);
   img.alt = q.kana;
+  img.loading = "lazy"; 
   img.style.width = "100%";
   img.style.cursor = "pointer";
 
@@ -315,6 +317,7 @@ function renderReadbook() {
 
     const img = document.createElement("img");
     img.src = "images/" + kanaToFile(q.kana);
+    img.loading = "lazy"; 
     img.style.width = "50px";
     img.style.aspectRatio = "5 / 7";
     img.style.objectFit = "contain";
