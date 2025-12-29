@@ -225,6 +225,7 @@ function showGame() {
 function showBook() {
   hideIfExists("menuView");
   hideIfExists("gameView");
+   hideIfExists("dailyDetailView");
 
   const book = document.getElementById("bookView");
   if (book) book.hidden = false;
