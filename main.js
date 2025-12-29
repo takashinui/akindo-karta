@@ -197,26 +197,38 @@ function startGame() {
   showQuestion();
 }
 
+function hideIfExists(id) {
+  const el = document.getElementById(id);
+  if (el) el.hidden = true;
+}
+
 function showMenu() {
-  document.getElementById("menuView").hidden = false;
-  document.getElementById("gameView").hidden = true;
-  document.getElementById("bookView").hidden = true;
-  document.getElementById("dailyDetailView").hidden = true;
+  const menu = document.getElementById("menuView");
+  if (menu) menu.hidden = false;
+
+  hideIfExists("gameView");
+  hideIfExists("bookView");
+  hideIfExists("dailyDetailView");
 }
 
 function showGame() {
-  document.getElementById("menuView").hidden = true;
-  document.getElementById("gameView").hidden = false;
-  document.getElementById("bookView").hidden = true;
-  document.getElementById("dailyDetailView").hidden = true;
+  hideIfExists("menuView");
+  const game = document.getElementById("gameView");
+  if (game) game.hidden = false;
+
+  hideIfExists("bookView");
+  hideIfExists("dailyDetailView");
   startGame();
 }
 
 function showBook() {
-  document.getElementById("menuView").hidden = true;
-  document.getElementById("gameView").hidden = true;
-  document.getElementById("bookView").hidden = false;
-  document.getElementById("dailyDetailView").hidden = true;
+  hideIfExists("menuView");
+  hideIfExists("gameView");
+
+  const book = document.getElementById("bookView");
+  if (book) book.hidden = false;
+
+  hideIfExists("dailyDetailView");
 }
 
 
