@@ -316,7 +316,8 @@ function renderReadbook() {
 
     const img = document.createElement("img");
     img.src = "images/" + kanaToFile(q.kana);
-    img.loading = "lazy"; 
+    img.loading = "lazy";
+    img.className = "readbook-thumb";
     img.style.width = "50px";
     img.style.aspectRatio = "5 / 7";
     img.style.objectFit = "contain";
