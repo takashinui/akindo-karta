@@ -201,18 +201,23 @@ function startGame() {
 function showMenu() {
   document.getElementById("menuView").hidden = false;
   document.getElementById("gameView").hidden = true;
+  document.getElementById("bookView").hidden = true;
+  document.getElementById("dailyDetailView").hidden = true;
 }
 
 function showGame() {
   document.getElementById("menuView").hidden = true;
   document.getElementById("gameView").hidden = false;
-    startGame();
+  document.getElementById("bookView").hidden = true;
+  document.getElementById("dailyDetailView").hidden = true;
+  startGame();
 }
 
 function showBook() {
   document.getElementById("menuView").hidden = true;
   document.getElementById("gameView").hidden = true;
   document.getElementById("bookView").hidden = false;
+  document.getElementById("dailyDetailView").hidden = true;
 }
 
 
@@ -252,7 +257,7 @@ function renderDailyCard() {
   container.appendChild(img);
 
   img.addEventListener("click", () => {
-    showDailyCardDetail(q);
+     showDailyDetail(q);
   });
 }
 
