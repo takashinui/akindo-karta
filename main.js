@@ -295,8 +295,7 @@ function showDailyDetail(q) {
 }
 
 function renderReadbook() {
-   alert("renderReadbook fired");
-  const root = document.getElementById("readbookRoot");
+     const root = document.getElementById("readbookRoot");
   if (!root) return;
 
   root.innerHTML = "";
