@@ -94,7 +94,6 @@ wrapper.appendChild(mask);
 
 cardDiv.appendChild(wrapper);
 cardDiv.appendChild(mark);
-    cardDiv.appendChild(mark);
 
    cardDiv.onclick = () => {
   if (hasAnswered) return;
