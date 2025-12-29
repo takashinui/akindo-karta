@@ -87,7 +87,7 @@
       object-fit: contain;
       display: block;
     }
-    
+
 .backToMenu {
   display: inline-block;
   margin-bottom: 12px;
@@ -188,6 +188,28 @@
         max-width: 280px;
       }
     }
+/* 今日の1枚 詳細画像 */
+.daily-detail-image {
+  display: block;
+  margin: 0 auto 12px;
+  width: 80vw;        /* ← iPhone基準 */
+  max-width: 260px;  /* ← 大きすぎ防止 */
+}
+
+/* iPad以上 */
+@media (min-width: 768px) {
+  .daily-detail-image {
+    width: 50vw;
+    max-width: 320px;
+  }
+}
+
+/* PC */
+@media (min-width: 1024px) {
+  .daily-detail-image {
+    width: 320px;
+  }
+}
 
     #menuView button,
     #gameView button.backToMenu {
