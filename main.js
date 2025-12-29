@@ -281,7 +281,7 @@ function showDailyDetail(q) {
   const container = document.getElementById("dailyDetailContent");
   container.innerHTML = `
     <img src="images/${kanaToFile(q.kana)}"
-         style="width:100%; max-width:320px; display:block; margin:0 auto 12px;">
+     class="daily-detail-image">
     <div style="font-weight:700; margin-bottom:6px;">
       ${q.fullPhrase}
     </div>
