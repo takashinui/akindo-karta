@@ -260,31 +260,6 @@ function renderDailyCard() {
   });
 }
 
-function showDailyCardDetail(q) {
-  const section = document.getElementById("dailyCardSection");
-
-  // すでに詳細が出ていたら何もしない
-  if (section.querySelector(".daily-detail")) return;
-
-  const detail = document.createElement("div");
-  detail.className = "daily-detail";
-  detail.style.marginTop = "8px";
-  detail.style.background = "#fff";
-  detail.style.padding = "10px";
-  detail.style.borderRadius = "10px";
-  detail.style.boxShadow = "0 1px 3px rgba(0,0,0,0.2)";
-
-  detail.innerHTML = `
-    <div style="font-weight:bold; margin-bottom:4px;">
-      ${q.fullPhrase}
-    </div>
-    <div style="font-size:14px; line-height:1.5;">
-      ${q.explanation}
-    </div>
-  `;
-
-  section.appendChild(detail);
-}
 function showDailyDetail(q) {
   document.getElementById("menuView").hidden = true;
   document.getElementById("gameView").hidden = true;
