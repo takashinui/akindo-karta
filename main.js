@@ -229,6 +229,7 @@ function showBook() {
   if (book) book.hidden = false;
 
   hideIfExists("dailyDetailView");
+  renderReadbook(); 
 }
 
 
@@ -290,6 +291,50 @@ function showDailyDetail(q) {
     </div>
   `;
 }
+
+function renderReadbook() {
+  const root = document.getElementById("readbookRoot");
+  if (!root) return;
+
+  root.innerHTML = "";
+
+  // 50音順で並べる
+  const sorted = [...questions].sort((a, b) =>
+    a.kana.localeCompare(b.kana, "ja")
+  );
+
+  sorted.forEach(q => {
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.alignItems = "center";
+    row.style.gap = "12px";
+    row.style.padding = "6px 0";
+    row.style.cursor = "pointer";
+    row.style.borderBottom = "1px solid #ddd";
+
+    const img = document.createElement("img");
+    img.src = "images/" + kanaToFile(q.kana);
+    img.style.width = "50px";
+    img.style.aspectRatio = "5 / 7";
+    img.style.objectFit = "contain";
+
+    const title = document.createElement("div");
+    title.textContent = q.fullPhrase;
+    title.style.fontSize = "14px";
+    title.style.fontWeight = "600";
+
+    row.appendChild(img);
+    row.appendChild(title);
+
+    // クリックしたら「今日の1枚」と同じ詳細へ
+    row.addEventListener("click", () => {
+      showDailyDetail(q);
+    });
+
+    root.appendChild(row);
+  });
+}
+
 
 window.addEventListener("load", () => {
   showMenu();
