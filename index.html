@@ -233,7 +233,26 @@
   display: block;
   background: #eee;
 }
+/* 共通ボタンUI（見た目のみ） */
+.backButton {
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: none;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
 
+/* 右上固定 */
+.topRight {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+}
+
+    
     
   </style>
 </head>
@@ -258,7 +277,12 @@
     <div class="cards" id="cards"></div>
     <div id="fullPhrase"></div>
     <div id="explanation"></div>
-    <button id="nextButton">次の問題</button>
+    <button id="nextButton">次の問題 →</button>
+    <button id="nextButton"
+  class="backButton topRight">
+  次の問題 →
+</button>
+    
   </div>
 
   <div id="bookView" class="container" hidden>
@@ -273,11 +297,13 @@
 
 <button
   id="detailBackBtn"
-  class="backToMenu"
-  style="position:fixed; top:12px; right:12px;"
+  class="backButton topRight"
   onclick="showBook()">
   カルタ目次へ →
 </button>
+
+    
+
     
     <div id="dailyDetailContent" style="margin-top:12px;">
       <!-- JSで中身を差し込む -->
