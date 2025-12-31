@@ -19,6 +19,8 @@
       padding: 12px;
       box-sizing: border-box;
     }
+/* debug code */
+    #detailBackBtn { z-index: 9999; }
 
     #currentKana {
       text-align: center;
@@ -262,6 +264,13 @@
   right: 12px;
 }
 
+/* ===== 検証用：右上 fixed 要素を一時的に無効化 ===== */
+#nextButton,
+.backButton.topRight {
+  pointer-events: none;
+}
+
+    
     
     
   </style>
