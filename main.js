@@ -352,14 +352,20 @@ function renderReadbook() {
   });
 }
 
-
 window.addEventListener("load", () => {
   showMenu();
   renderDailyCard();
+
   document.getElementById("startGameBtn")
     ?.addEventListener("click", showGame);
-  document.querySelectorAll(".backToMenu")
-    .forEach(btn => btn.addEventListener("click", showMenu));
+
   document.getElementById("openBookBtn")
     ?.addEventListener("click", showBook);
+
+  document.querySelectorAll(".backToMenu")
+    .forEach(btn => btn.addEventListener("click", showMenu));
+
+  document.getElementById("detailBackBtn")
+    ?.addEventListener("click", showBook);
 });
+
