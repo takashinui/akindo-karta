@@ -223,6 +223,7 @@ function showGame() {
 }
 
 function showBook() {
+  alert("showBook fired");
   hideIfExists("menuView");
   hideIfExists("gameView");
    hideIfExists("dailyDetailView");
