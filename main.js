@@ -235,10 +235,7 @@ function showBook() {
 
   hideIfExists("dailyDetailView");
   renderReadbook(); 
-  if (book) {
-  requestAnimationFrame(() => {
-    book.scrollTop = readbookScrollTop;
-  });
+  
 }
 }
 function showDailyDetail(q) {
