@@ -136,13 +136,15 @@
     }
 
     /* ③ Safariタップ最適化：ボタンのダブルタップ問題を軽減 */
-    #nextButton {
+#nextButton {
   display: none;
   position: fixed;
   top: 12px;
   right: 12px;
+  margin: 0;
 
-  margin: 0;               /* ★ 必須 */
+  z-index: 1000;   /* ★ 追加 */
+
   padding: 12px 16px;
   font-size: 16px;
   font-weight: 600;
@@ -151,10 +153,8 @@
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   cursor: pointer;
-
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
 }
+
 
     @media (min-width: 768px) {
       #currentKana {
@@ -248,6 +248,7 @@
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   cursor: pointer;
+    z-index: 900;
 }
 
 /* 右上固定 */
@@ -299,17 +300,22 @@
 
 <div id="dailyDetailView" class="container" hidden>
 
+  <!-- 左上：トップに戻る -->
+  <button class="backToMenu">← トップへ戻る</button>
+
+  <!-- 右上：読本に戻る -->
   <button
     id="detailBackBtn"
     class="backButton topRight"
     onclick="showBook()">
     カルタ目次へ →
   </button>
-    
-    <div id="dailyDetailContent" style="margin-top:12px;">
-      <!-- JSで中身を差し込む -->
-    </div>
+
+  <div id="dailyDetailContent" style="margin-top:12px;">
+    <!-- JSで中身 -->
   </div>
+</div>
+
 
 
   <!-- ★ ここが重要：main.js が questions.js を import する -->
