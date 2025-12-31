@@ -235,8 +235,6 @@ function showBook() {
 
   hideIfExists("dailyDetailView");
   renderReadbook(); 
-  
-}
 }
 function showDailyDetail(q) {
   // 他の view をすべて隠す
