@@ -283,24 +283,13 @@ function renderDailyCard() {
   });
 }
 
-function showDailyDetail(q) {
-  document.getElementById("menuView").hidden = true;
-  document.getElementById("gameView").hidden = true;
-  document.getElementById("bookView").hidden = true;
-  document.getElementById("dailyDetailView").hidden = false;
-
-  const container = document.getElementById("dailyDetailContent");
-  container.innerHTML = `
-    <img src="images/${kanaToFile(q.kana)}"
-     class="daily-detail-image">
-    <div style="font-weight:700; margin-bottom:6px;">
-      ${q.fullPhrase}
-    </div>
-    <div style="line-height:1.6;">
-      ${q.explanation}
-    </div>
-  `;
-}
+ // ★ 追加：右上の「次の問題」ボタンを完全に無効化
+  const nextBtn = document.getElementById("nextButton");
+  if (nextBtn) {
+    nextBtn.style.display = "none";
+    nextBtn.style.visibility = "hidden";
+    nextBtn.style.pointerEvents = "none";
+  }
 
 function renderReadbook() {
      const root = document.getElementById("readbookRoot");
