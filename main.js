@@ -23,6 +23,8 @@ function kanaToFile(k) {
 let currentIndex = 0;
 let order = [];
 let hasAnswered = false;
+let readbookScrollTop = 0;
+
 
 function shuffleOrder() {
   order = [...Array(questions.length).keys()];
@@ -233,6 +235,11 @@ function showBook() {
 
   hideIfExists("dailyDetailView");
   renderReadbook(); 
+  if (book) {
+  requestAnimationFrame(() => {
+    book.scrollTop = readbookScrollTop;
+  });
+}
 }
 function showDailyDetail(q) {
   // 他の view をすべて隠す
@@ -344,9 +351,13 @@ function renderReadbook() {
     row.appendChild(title);
 
     // クリックしたら「今日の1枚」と同じ詳細へ
-    row.addEventListener("click", () => {
-      showDailyDetail(q);
-    });
+ row.addEventListener("click", () => {
+  const bookView = document.getElementById("bookView");
+  if (bookView) {
+    readbookScrollTop = bookView.scrollTop;
+  }
+  showDailyDetail(q);
+});
 
     root.appendChild(row);
   });
