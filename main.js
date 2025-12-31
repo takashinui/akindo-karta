@@ -259,7 +259,6 @@ function showDailyDetail(q) {
       ${q.explanation}
     </div>
   `;
-  requestAnimationFrame(() => {
   window.scrollTo(0, 0);
 });
 
