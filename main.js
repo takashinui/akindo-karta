@@ -45,7 +45,12 @@ function showQuestion() {
   const kanaEl = document.getElementById("currentKana");
   const fullPhraseEl = document.getElementById("fullPhrase");
   const explanationEl = document.getElementById("explanation");
-  const nextBtn = document.getElementById("nextButton");
+const nextBtn = document.getElementById("nextButton");
+if (nextBtn) {
+  nextBtn.style.display = "none";
+  nextBtn.style.visibility = "hidden";
+  nextBtn.style.pointerEvents = "none";
+}
 
   // 表示初期化
   kanaEl.textContent = q.leadingKana;
@@ -141,8 +146,9 @@ function showFullPhraseAndExplanation(q) {
   explanationEl.textContent = q.explanation;
   explanationEl.style.display = "block";
 
-  nextBtn.style.display = "block";
-
+nextBtn.style.display = "block";
+nextBtn.style.visibility = "visible";
+nextBtn.style.pointerEvents = "auto";
   // 「次の問題」ボタンはここで有効化（③の対策もここ）
   enableNextButton();
 }
