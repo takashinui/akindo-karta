@@ -45,7 +45,7 @@ function showQuestion() {
   const kanaEl = document.getElementById("currentKana");
   const fullPhraseEl = document.getElementById("fullPhrase");
   const explanationEl = document.getElementById("explanation");
-
+const nextBtn = document.getElementById("nextButton");
 
   // 表示初期化
   kanaEl.textContent = q.leadingKana;
@@ -243,14 +243,6 @@ function showDailyDetail(q) {
   // 詳細 view を表示
   const detail = document.getElementById("dailyDetailView");
   if (detail) detail.hidden = false;
-
-  // 次の問題ボタンを無効化（右上干渉防止）
-  const nextBtn = document.getElementById("nextButton");
-  if (nextBtn) {
-    nextBtn.style.display = "none";
-    nextBtn.style.visibility = "hidden";
-    nextBtn.style.pointerEvents = "none";
-  }
 
   // 中身を描画
   const container = document.getElementById("dailyDetailContent");
