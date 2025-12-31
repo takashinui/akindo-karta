@@ -228,14 +228,16 @@ function showGame() {
 function showBook() {
   hideIfExists("menuView");
   hideIfExists("gameView");
-   hideIfExists("dailyDetailView");
+  hideIfExists("dailyDetailView");
 
   const book = document.getElementById("bookView");
   if (book) book.hidden = false;
 
-  hideIfExists("dailyDetailView");
-  renderReadbook(); 
+  renderReadbook();
+
+  window.scrollTo(0, readbookScrollTop);
 }
+
 function showDailyDetail(q) {
   // 他の view をすべて隠す
   hideIfExists("menuView");
@@ -258,7 +260,7 @@ function showDailyDetail(q) {
     </div>
   `;
   window.scrollTo(0, 0);
-});
+}
 
 }
 
@@ -304,14 +306,6 @@ function renderDailyCard() {
   });
 }
 
- // ★ 追加：右上の「次の問題」ボタンを完全に無効化
-  const nextBtn = document.getElementById("nextButton");
-  if (nextBtn) {
-    nextBtn.style.display = "none";
-    nextBtn.style.visibility = "hidden";
-    nextBtn.style.pointerEvents = "none";
-  }
-
 function renderReadbook() {
      const root = document.getElementById("readbookRoot");
   if (!root) return;
@@ -349,13 +343,11 @@ function renderReadbook() {
     row.appendChild(title);
 
     // クリックしたら「今日の1枚」と同じ詳細へ
- row.addEventListener("click", () => {
-  const bookView = document.getElementById("bookView");
-  if (bookView) {
-    readbookScrollTop = bookView.scrollTop;
-  }
+row.addEventListener("click", () => {
+  readbookScrollTop = window.scrollY;
   showDailyDetail(q);
 });
+
 
     root.appendChild(row);
   });
