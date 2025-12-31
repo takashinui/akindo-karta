@@ -197,7 +197,6 @@ function enableNextButton() {
 function startGame() {
   shuffleOrder();
   currentIndex = 0;
-  console.log("questions:", questions.length, "問");
   showQuestion();
 }
 
@@ -259,11 +258,7 @@ function showDailyDetail(q) {
       ${q.explanation}
     </div>
   `;
-  window.scrollTo(0, 0);
 }
-
-}
-
 
 function getTodayKey() {
   const now = new Date();
