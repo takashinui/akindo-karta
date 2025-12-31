@@ -45,12 +45,7 @@ function showQuestion() {
   const kanaEl = document.getElementById("currentKana");
   const fullPhraseEl = document.getElementById("fullPhrase");
   const explanationEl = document.getElementById("explanation");
-const nextBtn = document.getElementById("nextButton");
-if (nextBtn) {
-  nextBtn.style.display = "none";
-  nextBtn.style.visibility = "hidden";
-  nextBtn.style.pointerEvents = "none";
-}
+
 
   // 表示初期化
   kanaEl.textContent = q.leadingKana;
@@ -238,6 +233,36 @@ function showBook() {
 
   hideIfExists("dailyDetailView");
   renderReadbook(); 
+}
+function showDailyDetail(q) {
+  // 他の view をすべて隠す
+  hideIfExists("menuView");
+  hideIfExists("gameView");
+  hideIfExists("bookView");
+
+  // 詳細 view を表示
+  const detail = document.getElementById("dailyDetailView");
+  if (detail) detail.hidden = false;
+
+  // 次の問題ボタンを無効化（右上干渉防止）
+  const nextBtn = document.getElementById("nextButton");
+  if (nextBtn) {
+    nextBtn.style.display = "none";
+    nextBtn.style.visibility = "hidden";
+    nextBtn.style.pointerEvents = "none";
+  }
+
+  // 中身を描画
+  const container = document.getElementById("dailyDetailContent");
+  container.innerHTML = `
+    <img src="images/${kanaToFile(q.kana)}" class="daily-detail-image">
+    <div style="font-weight:700; margin-bottom:6px;">
+      ${q.fullPhrase}
+    </div>
+    <div style="line-height:1.6;">
+      ${q.explanation}
+    </div>
+  `;
 }
 
 
